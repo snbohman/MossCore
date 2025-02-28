@@ -10,8 +10,8 @@ workspace "moss"
         targetdir "bin/%{cfg.buildcfg}"
         objdir "build/%{cfg.buildcfg}"
 
-        files { "moss/src/**.cpp" }
-        includedirs { "moss/include", "entt" }
+        files { "src/**.cpp" }
+        includedirs { "include", "entt" }
         links { "raylib", "fmt" }
 
         filter "configurations:debug"
