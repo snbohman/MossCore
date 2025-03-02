@@ -12,17 +12,17 @@ endif
 
 ifeq ($(config),debug)
   ifeq ($(origin CC), default)
-    CC = gcc
+    CC = clang
   endif
   ifeq ($(origin CXX), default)
-    CXX = g++
+    CXX = clang++
   endif
   ifeq ($(origin AR), default)
     AR = ar
   endif
   RESCOMP = windres
   TARGETDIR = ../bin/debug
-  TARGET = $(TARGETDIR)/libmoss.a
+  TARGET = $(TARGETDIR)/libmossCore.a
   OBJDIR = ../build/debug
   DEFINES += -DDEBUG
   INCLUDES += -I../include -I../entt
@@ -33,7 +33,7 @@ ifeq ($(config),debug)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lraylib -lfmt
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -fuse-ld=lld
   LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -48,17 +48,17 @@ endif
 
 ifeq ($(config),release)
   ifeq ($(origin CC), default)
-    CC = gcc
+    CC = clang
   endif
   ifeq ($(origin CXX), default)
-    CXX = g++
+    CXX = clang++
   endif
   ifeq ($(origin AR), default)
     AR = ar
   endif
   RESCOMP = windres
   TARGETDIR = ../bin/release
-  TARGET = $(TARGETDIR)/libmoss.a
+  TARGET = $(TARGETDIR)/libmossCore.a
   OBJDIR = ../build/release
   DEFINES += -DNDEBUG
   INCLUDES += -I../include -I../entt
@@ -69,7 +69,7 @@ ifeq ($(config),release)
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lraylib -lfmt
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -fuse-ld=lld
   LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
   define PREBUILDCMDS
   endef
@@ -83,9 +83,9 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/init.o \
-	$(OBJDIR)/state.o \
-	$(OBJDIR)/systems.o \
+	$(OBJDIR)/app.o \
+	$(OBJDIR)/render.o \
+	$(OBJDIR)/scene.o \
 
 RESOURCES := \
 
@@ -97,7 +97,7 @@ ifeq (.exe,$(findstring .exe,$(ComSpec)))
 endif
 
 $(TARGET): $(GCH) ${CUSTOMFILES} $(OBJECTS) $(LDDEPS) $(RESOURCES) | $(TARGETDIR)
-	@echo Linking moss
+	@echo Linking mossCore
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -120,7 +120,7 @@ else
 endif
 
 clean:
-	@echo Cleaning moss
+	@echo Cleaning mossCore
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(OBJDIR)
@@ -144,13 +144,13 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/init.o: ../src/core/init.cpp
+$(OBJDIR)/app.o: ../src/core/app.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/state.o: ../src/core/state.cpp
+$(OBJDIR)/render.o: ../src/core/render.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/systems.o: ../src/render/systems.cpp
+$(OBJDIR)/scene.o: ../src/core/scene.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

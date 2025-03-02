@@ -1,7 +1,8 @@
 #pragma once
 
 #include <moss/includes.hpp>
-#include <moss/components/components.hpp>
+#include <moss/ecs/components.hpp>
+#include <memory.h>
 
 /// Custom serialization for glm::vec2 ///
 namespace glm {
@@ -40,9 +41,33 @@ inline void from_json(const json& j, glm::vec4& vec) {
 
 }
 
-namespace moss {
 
 #define SERIALIZE_COMPONENT(component, ...)  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(component, __VA_ARGS__);
+
+#define FILL_COMPONENT_DATA(component) { \
+    #component, \
+    [&registry](entt::entity entity, const json& data) { \
+        registry.emplace<component>(entity, data.get<component>()); \
+    } \
+}
+
+#define REGISTER_COMPONENT(component) componentRegistry[#component] = \
+    [&registry](entt::entity entity, const json& data) { \
+        registry.emplace<component>(entity, data.get<component>()); \
+    }
+
+#define REGISTER_TAG(tag) componentRegistry[#tag] = \
+    [&registry](entt::entity entity, const json& data) { \
+        registry.emplace<tag>(entity); \
+    }
+
+#define REGISTER_SYSTEM(sys) componentRegistry[#sys] = \
+    [&registry](entt::entity entity, const json& data) { \
+        auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique(sys)); \
+        s->init(); s->init(registry); \
+    }
+
+namespace moss {
 
 SERIALIZE_COMPONENT(moss::RectTransform, position, size, rotation);
 SERIALIZE_COMPONENT(moss::CircleTransform, position, radius);

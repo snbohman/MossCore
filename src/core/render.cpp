@@ -1,10 +1,10 @@
 #include <moss/includes.hpp>
-#include <moss/render/systems.hpp>
-#include <moss/components/components.hpp>
+#include <moss/core/render.hpp>
+#include <moss/ecs/components.hpp>
 #include <moss/utils.hpp>
 
 
-void moss::render::update(entt::registry& registry) {
+void moss::Render::tick(entt::registry& registry) {
     raylib::ClearBackground(raylib::BLACK);
     raylib::BeginDrawing();
     

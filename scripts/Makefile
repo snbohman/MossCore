@@ -9,29 +9,26 @@ ifndef verbose
 endif
 
 ifeq ($(config),debug)
-  moss_config = debug
-
-else ifeq ($(config),release)
-  moss_config = release
-
-else
-  $(error "invalid configuration $(config)")
+  mossCore_config = debug
+endif
+ifeq ($(config),release)
+  mossCore_config = release
 endif
 
-PROJECTS := moss
+PROJECTS := mossCore
 
 .PHONY: all clean help $(PROJECTS) 
 
 all: $(PROJECTS)
 
-moss:
-ifneq (,$(moss_config))
-	@echo "==== Building moss ($(moss_config)) ===="
-	@${MAKE} --no-print-directory -C . -f moss.make config=$(moss_config)
+mossCore:
+ifneq (,$(mossCore_config))
+	@echo "==== Building mossCore ($(mossCore_config)) ===="
+	@${MAKE} --no-print-directory -C . -f mossCore.make config=$(mossCore_config)
 endif
 
 clean:
-	@${MAKE} --no-print-directory -C . -f moss.make clean
+	@${MAKE} --no-print-directory -C . -f mossCore.make clean
 
 help:
 	@echo "Usage: make [config=name] [target]"
@@ -43,6 +40,6 @@ help:
 	@echo "TARGETS:"
 	@echo "   all (default)"
 	@echo "   clean"
-	@echo "   moss"
+	@echo "   mossCore"
 	@echo ""
 	@echo "For more information, see https://github.com/premake/premake-core/wiki"

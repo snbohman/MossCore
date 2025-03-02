@@ -8,6 +8,10 @@ struct Component {
     virtual ~Component() = default;
 };
 
+struct Tag {
+    virtual ~Tag() = default;
+};
+
 struct RectTransform : Component {
     glm::f32vec2 position;
     glm::f32vec2 size;
@@ -42,5 +46,7 @@ struct Material : Component {
     glm::f32 thickness;
     bool fill;
 };
+
+struct CurrentSceneTag : Tag { };
 
 } // moss
