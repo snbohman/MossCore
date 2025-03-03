@@ -1,4 +1,5 @@
 build
 bin
+scripts
 compile_flags.txt
 *.o
