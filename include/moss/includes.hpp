@@ -1,3 +1,10 @@
+/*
+includes.hpp - parentless
+
+Used for easy includes of used libaries.
+
+*/
+
 #pragma once
 
 #include <entt/entt.hpp>

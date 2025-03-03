@@ -1,12 +1,25 @@
+/*
+ecs/serialization.hpp - parentless
+
+Serializes the standard components and 
+includes all of the serialization of glm.
+Also defines handy macros for user use
+when serializing entity attatchements.
+
+*/
+
 #pragma once
 
 #include <moss/includes.hpp>
 #include <moss/ecs/components.hpp>
 #include <memory.h>
 
-/// Custom serialization for glm::vec2 ///
+
+////////////////////////////////////
+//// -- Custom serialization -- ////
+////////////////////////////////////
 namespace glm {
-/// - json <-> glm::vec2 - ///
+// -- json <-> glm::vec2 -- //
 inline void to_json(json& j, const glm::vec2& v) {
     j = json::array({ v.x, v.y });
 }
@@ -16,7 +29,7 @@ inline void from_json(const json& j, glm::vec2& vec) {
     vec.y = j[1].get<float>();
 }
 
-/// - json <-> glm::vec3 - ///
+// -- json <-> glm::vec3 -- //
 inline void to_json(json& j, const glm::vec3& v) {
     j = json::array({ v.x, v.y, v.z });
 }
@@ -27,7 +40,7 @@ inline void from_json(const json& j, glm::vec3& vec) {
     vec.z = j[2].get<float>();
 }
 
-/// - json <-> glm::vec4 - ///
+// -- json <-> glm::vec4 -- //
 inline void to_json(json& j, const glm::vec4& v) {
     j = json::array({ v.x, v.y, v.z, v.a });
 }
@@ -39,34 +52,40 @@ inline void from_json(const json& j, glm::vec4& vec) {
     vec.a = j[3].get<float>();
 }
 
-}
+} // glm
 
 
+/////////////////////////////////////
+//// -- Serialization defines -- ////
+/////////////////////////////////////
 #define SERIALIZE_COMPONENT(component, ...)  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(component, __VA_ARGS__);
 
 #define FILL_COMPONENT_DATA(component) { \
     #component, \
-    [&registry](entt::entity entity, const json& data) { \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
     } \
 }
 
 #define REGISTER_COMPONENT(component) componentRegistry[#component] = \
-    [&registry](entt::entity entity, const json& data) { \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
     }
 
 #define REGISTER_TAG(tag) componentRegistry[#tag] = \
-    [&registry](entt::entity entity, const json& data) { \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<tag>(entity); \
     }
 
 #define REGISTER_SYSTEM(sys) componentRegistry[#sys] = \
-    [&registry](entt::entity entity, const json& data) { \
-        auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique(sys)); \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
         s->init(); s->init(registry); \
     }
 
+/////////////////////////////////////////////////
+//// -- Standard components serialization -- ////
+/////////////////////////////////////////////////
 namespace moss {
 
 SERIALIZE_COMPONENT(moss::RectTransform, position, size, rotation);
@@ -76,4 +95,4 @@ SERIALIZE_COMPONENT(moss::RegPolyTransform, position, numPoints, radius, rotatio
 SERIALIZE_COMPONENT(moss::Physics, velocity, acceleration, mass, elasticity);
 SERIALIZE_COMPONENT(moss::Material, color, thickness, fill);
 
-}
+} // moss

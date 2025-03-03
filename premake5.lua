@@ -3,7 +3,8 @@ workspace "moss"
     architecture "x86_64"
     location "scripts"
     toolset "clang"
-    linkoptions { "-fuse-ld=lld" }
+    linkoptions { "-fuse-ld=lld" } -- use more modern LLVM linker than default
+    buildoptions { "-Wno-macro-redefined"}
 
 project "mossCore"
     kind "StaticLib"

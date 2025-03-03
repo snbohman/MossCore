@@ -1,7 +1,7 @@
 /*
+utils.hpp - parentless
 
 Core utils namespace(s). Includes the essentials.
-The utils namespace might be added to in proj.
 
 */
 

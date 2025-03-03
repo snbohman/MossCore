@@ -1,3 +1,11 @@
+/*
+ecs/componentDefinitions.hpp - parentless
+
+Defines all of the standard components and the
+standard component base class.
+
+*/
+
 #pragma once
 
 #include <moss/includes.hpp>
