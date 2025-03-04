@@ -12,14 +12,12 @@ standard component base class.
 
 namespace moss {
 
+/* -- Base Classes -- */
 struct Component {
     virtual ~Component() = default;
 };
 
-struct Tag {
-    virtual ~Tag() = default;
-};
-
+/* -- User Usage -- */
 struct RectTransform : Component {
     glm::f32vec2 position;
     glm::f32vec2 size;
@@ -55,6 +53,8 @@ struct Material : Component {
     bool fill;
 };
 
-struct CurrentSceneTag : Tag { };
+
+/* -- Engine Usage -- */
+struct CurrentSceneTag : Component { };
 
 } // moss

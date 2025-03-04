@@ -12,6 +12,7 @@ when serializing entity attatchements.
 
 #include <moss/includes.hpp>
 #include <moss/ecs/components.hpp>
+#include <moss/ecs/renderable.hpp>
 #include <memory.h>
 
 
@@ -67,6 +68,28 @@ inline void from_json(const json& j, glm::vec4& vec) {
     } \
 }
 
+#define FILL_TAG_DATA(tag) { \
+    #tag, \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        registry.emplace<tag>(entity); \
+    } \
+}
+
+#define FILL_SYSTEM_DATA(sys) { \
+    #sys, \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
+        s->init(initCrate); \
+    } \
+}
+
+#define FILL_RENDERABLE_DATA(renderable) { \
+    #renderable, \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
+    } \
+}
+
 #define REGISTER_COMPONENT(component) componentRegistry[#component] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
@@ -77,10 +100,15 @@ inline void from_json(const json& j, glm::vec4& vec) {
         registry.emplace<tag>(entity); \
     }
 
-#define REGISTER_SYSTEM(sys) componentRegistry[#sys] = \
+#define REGISTER_SYSTEM(sys, initCrate) componentRegistry[#sys] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
-        s->init(); s->init(registry); \
+        s->init(initCrate); \
+    }
+
+#define REGISTER_RENDERABLE(renderable) componentRegistry[#renderable] = \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
     }
 
 /////////////////////////////////////////////////

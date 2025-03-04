@@ -7,27 +7,36 @@ Implements core/scene.hpp
 
 #include <moss/includes.hpp>
 #include <moss/core/scene.hpp>
+#include <moss/ecs/renderable.hpp>
 #include <moss/defines.hpp>
 #include <fstream>
+#include <raylib.h>
 
 
 //////////////////////
 //// -- Public -- ////
 //////////////////////
-void moss::Scene::tick() {
+void moss::Scene::tick(moss::SystemTickCrate crate) {
     // -- Run Systems -- //
-    for (const auto& entity : registry.view<std::unique_ptr<System>>()) {
-        registry.get<std::unique_ptr<System>>(entity)->tick();
-        registry.get<std::unique_ptr<System>>(entity)->tick(registry);
-        registry.get<std::unique_ptr<System>>(entity)->tick(registry, raylib::GetFrameTime());
+    for (const entt::entity& entity : registry.view<std::unique_ptr<moss::System>>()) {
+        registry.get<std::unique_ptr<moss::System>>(entity)->tick({.entity = entity, .registry = registry, .deltaTime = raylib::GetFrameTime()});
     }
+
+    raylib::BeginDrawing();
+    raylib::ClearBackground(raylib::BLACK);
+
+    for (const entt::entity& entity : registry.view<std::unique_ptr<moss::Renderable>>()) {
+        registry.get<std::unique_ptr<moss::Renderable>>(entity)->render({ .entity = entity, .registry = registry });
+    }
+
+    raylib::EndDrawing();
 }
 
 
 ////////////////////////
 //// -- Builders -- ////
 ////////////////////////
-moss::Scene::Scene(const char* _id, const moss::types::ComponentRegistry& componentRegistry) : id(_id) {
+moss::Scene::Scene(moss::SceneInitCrate crate) : id(crate.id) {
     // -- Load Scene Config -- //
     json sceneConfig = json::parse(std::ifstream("data/sceneConfig.json"))[id];
     ERROR_IF(sceneConfig.empty(), "SceneConfig found empty");
@@ -36,9 +45,9 @@ moss::Scene::Scene(const char* _id, const moss::types::ComponentRegistry& compon
     for (const auto& [eName, data] : sceneConfig["entities"].items()) {
         entt::entity entity = registry.create();
         for (const auto& [cName, cData] : data.items()) {
-            auto it = componentRegistry.find(cName);
-            WARN_IF(it == componentRegistry.end(), "Entity attatchment (Component/Tag/System) \"{}\" not registered", cName)
-            if (it != componentRegistry.end()) it->second(registry, entity, cData);
+            auto it = crate.componentRegistry.find(cName);
+            WARN_IF(it == crate.componentRegistry.end(), "Entity attatchment (Component/Tag/System) \"{}\" not registered", cName)
+            if (it != crate.componentRegistry.end()) it->second(registry, entity, cData);
         }
     }
 }

@@ -16,11 +16,16 @@ registry, only including entities of the scene.
 
 namespace moss {
 
+struct SceneInitCrate {
+    const char* id;
+    const moss::types::ComponentRegistry& componentRegistry;
+};
+
 class Scene : public System {
 public:
-    Scene(const char* id, const moss::types::ComponentRegistry& componentRegistry);
-
-    void tick() override;
+    // -- Special init for scene system -- //
+    Scene(moss::SceneInitCrate crate);
+    void tick(moss::SystemTickCrate crate) override;
 
     const char* id;
     entt::registry registry;

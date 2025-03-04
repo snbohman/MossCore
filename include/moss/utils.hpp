@@ -8,6 +8,7 @@ Core utils namespace(s). Includes the essentials.
 #pragma once
 
 #include <moss/includes.hpp>
+#include <moss/defines.hpp>
 
 
 namespace moss {
@@ -40,7 +41,7 @@ namespace math {
 namespace glmRaylib {
     template<typename T, typename U>
     inline U glmToRaylib(const T& vec) {
-        static_assert(sizeof(T) == 0, "Unsupported vector type for glmToRaylib");
+        ERROR_IF(sizeof(T) == 0, "Unsupported vector type for glmToRaylib");
     }
 
     // Specialization for glm::vec2 -> Vector2
@@ -59,6 +60,10 @@ namespace glmRaylib {
     template<>
     inline raylib::Vector4 glmToRaylib<glm::vec4, raylib::Vector4>(const glm::vec4& vec) {
         return raylib::Vector4{vec.x, vec.y, vec.z, vec.w};
+    }
+
+    inline raylib::Rectangle glmToRect(const glm::vec2& pos, const glm::vec2& size) {
+        return { pos.x, pos.y, size.x, size.y };
     }
 
     // glm::vecX, raylib::VectorX
