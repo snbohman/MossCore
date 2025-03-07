@@ -6,9 +6,9 @@ Implements core/scene.hpp
 */
 
 #include <moss/includes.hpp>
+#include <moss/defines.hpp>
 #include <moss/core/scene.hpp>
 #include <moss/ecs/renderable.hpp>
-#include <moss/defines.hpp>
 #include <fstream>
 #include <raylib.h>
 
@@ -46,7 +46,7 @@ moss::Scene::Scene(moss::SceneInitCrate crate) : id(crate.id) {
         entt::entity entity = registry.create();
         for (const auto& [cName, cData] : data.items()) {
             auto it = crate.componentRegistry.find(cName);
-            WARN_IF(it == crate.componentRegistry.end(), "Entity attatchment (Component/Tag/System) \"{}\" not registered", cName)
+            WARN_IF_FORMAT(it == crate.componentRegistry.end(), "Entity attatchment (Component/Tag/System) \"{}\" not registered", cName)
             if (it != crate.componentRegistry.end()) it->second(registry, entity, cData);
         }
     }

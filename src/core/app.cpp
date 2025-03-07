@@ -97,7 +97,7 @@ moss::App::~App() { raylib::CloseWindow(); }
 moss::App::App() {
     // -- Load Window Config -- //
     json windowConfig = json::parse(std::ifstream("data/renderConfig.json"))["window"];
-    ERROR_IF(windowConfig.empty(), "WindowConfig found empty");
+    ERROR_IF(windowConfig.empty(), "WindowConfig found empty {}");
 
     // -- Initialize Raylib -- //
     raylib::SetTraceLogLevel(raylib::LOG_WARNING);
@@ -107,4 +107,9 @@ moss::App::App() {
         windowConfig["title"].get<std::string>().c_str()
     );
     raylib::SetTargetFPS(windowConfig["targetFPS"].get<glm::u16>());
+
+
+    // -- Initialize Camera -- //
+    entt::entity cameraEntity = m_registry.create();
+    m_registry.emplace<raylib::Camera2D>(cameraEntity);
 }

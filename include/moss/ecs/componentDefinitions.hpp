@@ -17,29 +17,56 @@ struct Component {
     virtual ~Component() = default;
 };
 
-/* -- User Usage -- */
-struct RectTransform : Component {
+struct Sprite2D : Component {
+    virtual ~Sprite2D() = default;
+};
+
+/* -- 2D -- */
+struct Camera2D : Component {
     glm::f32vec2 position;
-    glm::f32vec2 size;
+    glm::f32vec2 rotation;
+    glm::f32vec2 zoom;
+};
+
+struct Transform2D : Component {
+    glm::f32vec2 position;
+    glm::f32vec2 scale;
     glm::f32 rotation;
 };
 
-struct CircleTransform : Component {
-    glm::f32vec2 position;
+struct RectSprite : Sprite2D {
+    Transform2D transform;
+
+    glm::f32 thickness;
+    bool fill;
+};
+
+struct CircleSprite : Sprite2D {
+    Transform2D transform;
+
     glm::f32 radius;
+    glm::f32 thickness;
+    bool fill;
 };
 
-struct PolyTransform : Component {
+struct PolySprite : Sprite2D {
+    Transform2D transform;
+
     std::vector<glm::f32vec2> points;
+    glm::f32 thickness;
+    bool fill;
 };
 
-struct RegPolyTransform : Component {
-    glm::f32vec2 position;
+struct RegPolySprite : Sprite2D {
+    Transform2D transform;
+
     glm::u16 numPoints;
     glm::f32 radius;
-    glm::f32 rotation;
+    glm::f32 thickness;
+    bool fill;
 };
 
+/* -- Other -- */
 struct Physics : Component {
     glm::f32vec2 velocity;
     glm::f32vec2 acceleration;
@@ -48,11 +75,8 @@ struct Physics : Component {
 };
 
 struct Material : Component {
-    glm::f32vec4 color;
-    glm::f32 thickness;
-    bool fill;
+    glm::f32vec4 albedo;
 };
-
 
 /* -- Engine Usage -- */
 struct CurrentSceneTag : Component { };
