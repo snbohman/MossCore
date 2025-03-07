@@ -9,7 +9,11 @@ long types, such as ComponentRegistry.
 
 #pragma once
 
-#include <moss/includes.hpp>
+#include <spdlog/spdlog.h>
+#include <entt/entt.hpp>
+#include <nlohmann/json.hpp>
+using nlohmann::json;
+
 #include <fmt/format.h>
 #include <unordered_map>
 #include <functional>
@@ -55,7 +59,6 @@ static int infoStep3 = 0;
 //// -- Types -- ////
 /////////////////////
 namespace types {
-
     using ComponentRegistry = std::unordered_map<std::string, std::function<void(entt::registry&, entt::entity&, const json&)>>;
 
 } // types

@@ -10,9 +10,8 @@ when serializing entity attatchements.
 
 #pragma once
 
-#include <moss/includes.hpp>
+#include <moss/meta/libs.hpp>
 #include <moss/ecs/components.hpp>
-#include <moss/ecs/renderable.hpp>
 #include <memory.h>
 
 
@@ -116,11 +115,11 @@ inline void from_json(const json& j, glm::vec4& vec) {
 /////////////////////////////////////////////////
 namespace moss {
 
-SERIALIZE_COMPONENT(moss::RectTransform, position, size, rotation);
-SERIALIZE_COMPONENT(moss::CircleTransform, position, radius);
-SERIALIZE_COMPONENT(moss::PolyTransform, points);
-SERIALIZE_COMPONENT(moss::RegPolyTransform, position, numPoints, radius, rotation);
-SERIALIZE_COMPONENT(moss::Physics, velocity, acceleration, mass, elasticity);
-SERIALIZE_COMPONENT(moss::Material, color, thickness, fill);
+/*SERIALIZE_COMPONENT(moss::RectTransform, position, size, rotation);*/
+/*SERIALIZE_COMPONENT(moss::CircleTransform, position, radius);*/
+/*SERIALIZE_COMPONENT(moss::PolyTransform, points);*/
+/*SERIALIZE_COMPONENT(moss::RegPolyTransform, position, numPoints, radius, rotation);*/
+/*SERIALIZE_COMPONENT(moss::Physics, velocity, acceleration, mass, elasticity);*/
+/*SERIALIZE_COMPONENT(moss::Material, color, thickness, fill);*/
 
 } // moss

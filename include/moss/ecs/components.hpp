@@ -1,14 +1,22 @@
 /*
 ecs/components.hpp - parentless
 
-Includes both of the standard components and
-the serialization to prevent any unserialized
-components in a file.
+Defines all of the standard components and the
+standard component base class.
 
 */
 
-
 #pragma once
 
-#include <moss/ecs/componentDefinitions.hpp>
-#include <moss/ecs/serialization.hpp>
+namespace moss {
+
+/* -- Base Classes -- */
+struct Component {
+    virtual ~Component() = default;
+};
+
+
+/* -- Engine Usage -- */
+struct CurrentSceneTag : Component { };
+
+} // moss

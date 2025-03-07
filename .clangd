@@ -1,0 +1,8 @@
+CompileFlags:
+  Add: [-Wno-unused-command-line-argument]
+Diagnostics:
+  UnusedIncludes: Strict
+InlayHints:
+  Enabled: false
+Completion:
+  AddAutoIncludes: false
