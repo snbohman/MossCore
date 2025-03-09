@@ -36,22 +36,12 @@ static int infoStep3 = 0;
     else if (infoStep == 2) { infoStep2++;  infoStep3 = 0; } \
     else if (infoStep == 3) { infoStep3++; }
 
-#define ERROR_IF(statement, message) if (statement) { \
-    spdlog::error("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message); \
-    std::exit(0); \
+#define ERROR_IF(statement, message, ...) if (statement) { \
+    ERROR(message, __VA_ARGS__); \
 }
 
-#define WARN_IF(statement, message) if (statement) { \
-    spdlog::warn("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message); \
-}
-
-#define ERROR_IF_FORMAT(statement, message, ...) if (statement) { \
-    spdlog::error("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__)); \
-    std::exit(0); \
-}
-
-#define WARN_IF_FORMAT(statement, message, ...) if (statement) { \
-    spdlog::warn("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__)); \
+#define WARN_IF(statement, message, ...) if (statement) { \
+    WARN(message); \
 }
 
 

@@ -10,7 +10,7 @@ Implements utils::math with relevant helper functions.
 #include <moss/meta/libs.hpp>
 
 
-namespace utils::math {
+namespace moss::utils::math {
 
 inline glm::f32 length(const glm::vec2& v) {
     return distance(v, glm::f32vec2(0, 0));

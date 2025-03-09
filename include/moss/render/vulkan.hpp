@@ -21,24 +21,47 @@ are the only rendering alternatives. Inside the moss::render namespace.
 
 #include <moss/meta/vulkanLibs.hpp>
 #include <moss/meta/libs.hpp>
-#include <moss/ecs/systems.hpp>
+#include <moss/render/render.hpp>
 
 
 namespace moss::render {
 
-class Vulkan : System {
+class Vulkan : Renderer {
 public:
     void init() override;
     void tick() override;
     void exit() override;
+    bool shouldClose() override;
 
 private:
     void readConfig();
     void initWindow();
+    void createInstance();
+        void checkValidationLayerSupport();
+        std::vector<const char*> getRequiredExtensions();
+    void initDebugMessenger();
 
-    json config;
+    // -- Moss -- //
+    json windowConfig;
+    json vulkanConfig;
 
+    // -- GLFW -- //
     GLFWwindow* window;
+    
+    // -- Vulkan -- //
+    VkInstance instance;
+    VkDebugUtilsMessengerEXT debugMessenger;
+
+    const std::array<const char*, 1> validationLayers = {
+        "VK_LAYER_KHRONOS_validation"
+    };
+
+#ifdef NDEBUG
+    const bool enableValidationLayers = false;
+#else
+    const bool enableValidationLayers = true;
+#endif
+
 };
 
 
