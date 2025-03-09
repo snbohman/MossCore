@@ -5,8 +5,8 @@ Implements core/scene.hpp
 
 */
 
-#include <moss/includes.hpp>
-#include <moss/defines.hpp>
+#include <moss/meta/libs.hpp>
+#include <moss/meta/defines.hpp>
 #include <moss/core/scene.hpp>
 #include <moss/ecs/renderable.hpp>
 #include <fstream>

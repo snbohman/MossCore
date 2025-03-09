@@ -9,9 +9,9 @@ registry, only including entities of the scene.
 
 #pragma once
 
-#include <moss/includes.hpp>
+#include <moss/meta/libs.hpp>
 #include <moss/ecs/systems.hpp>
-#include <moss/defines.hpp>
+#include <moss/meta/defines.hpp>
 
 
 namespace moss {

@@ -5,7 +5,7 @@ Implements core/app.hpp.
 
 */
 
-#include <moss/includes.hpp>
+#include <moss/meta/libs.hpp>
 #include <moss/core/app.hpp>
 #include <moss/core/scene.hpp>
 #include <moss/ecs/components.hpp>

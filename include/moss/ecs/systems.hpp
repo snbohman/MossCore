@@ -8,6 +8,7 @@ Defines the standard system base class.
 #pragma once
 
 #include <moss/meta/libs.hpp>
+#include <moss/ecs/components.hpp>
 
 
 namespace moss {
@@ -31,11 +32,22 @@ struct SystemExitCrate {
 class System {
 public:
     System() = default;
-    inline virtual ~System() { }
+    ~System() = default;
 
-    inline virtual void init(moss::SystemInitCrate crate) { }
-    inline virtual void tick(moss::SystemTickCrate crate) { }
-    inline virtual void exit(moss::SystemExitCrate crate) { }
+    inline virtual void init() { }
+    inline virtual void tick() { }
+    inline virtual void exit() { }
+    inline virtual void init(SystemInitCrate crate) { }
+    inline virtual void tick(SystemTickCrate crate) { }
+    inline virtual void exit(SystemExitCrate crate) { }
 };
 
+///////////////////////////////
+//// -- Default systems -- ////
+///////////////////////////////
+namespace systems {
+
+class Physics : public System { };
+
+} // systems
 } // moss
