@@ -8,9 +8,8 @@ Implements core/app.hpp.
 #include <moss/meta/libs.hpp>
 #include <moss/core/app.hpp>
 #include <moss/core/scene.hpp>
-#include <moss/ecs/components.hpp>
-#include <moss/ecs/renderable.hpp>
-#include <fstream>
+#include <moss/ecs/ecs.hpp>
+#include <moss/utils/config.hpp>
 #include <memory>
 
 
@@ -18,9 +17,9 @@ Implements core/app.hpp.
 //// -- Public -- ////
 //////////////////////
 void moss::App::run() {
-    while (!raylib::WindowShouldClose()) {
+    /*while (!raylib::WindowShouldClose()) {*/
         getCurrentScene()->tick({ .registry = getCurrentScene()->registry });
-    }
+    /*}*/
 }
 
 void moss::App::addScene(const char* id, const bool& currentScene) {
@@ -35,17 +34,17 @@ void moss::App::addScene(const char* id, const bool& currentScene) {
 
     // -- Handle Current Scene-- //
     if (currentScene) {
-        auto view = m_registry.view<moss::CurrentSceneTag>();
-        if (view.size() != 0) { m_registry.remove<moss::CurrentSceneTag>(*view.begin()); }
-        m_registry.emplace<moss::CurrentSceneTag>(sceneEntity);
+        auto view = m_registry.view<moss::components::engine::CurrentSceneTag>();
+        if (view.size() != 0) { m_registry.remove<moss::components::engine::CurrentSceneTag>(*view.begin()); }
+        m_registry.emplace<moss::components::engine::CurrentSceneTag>(sceneEntity);
     }
 }
 
 void moss::App::setCurrentScene(const char* id) {
     for (const entt::entity& entity : m_registry.view<Scene>()) {
         if (m_registry.get<std::unique_ptr<Scene>>(entity)->id == id) {
-            m_registry.remove<moss::CurrentSceneTag>(*m_registry.view<moss::CurrentSceneTag>().begin());
-            m_registry.emplace<moss::CurrentSceneTag>(entity);
+            m_registry.remove<moss::components::engine::CurrentSceneTag>(*m_registry.view<moss::components::engine::CurrentSceneTag>().begin());
+            m_registry.emplace<moss::components::engine::CurrentSceneTag>(entity);
             return;
         }
     }
@@ -59,16 +58,9 @@ void moss::App::setComponentRegistry(const moss::types::ComponentRegistry& compo
 
 void moss::App::buildComponentRegistry(moss::types::ComponentRegistry& componentRegistry) {
     componentRegistry = {
-        FILL_COMPONENT_DATA(moss::RectTransform),
-        FILL_COMPONENT_DATA(moss::CircleTransform),
-        FILL_COMPONENT_DATA(moss::PolyTransform),
-        FILL_COMPONENT_DATA(moss::RegPolyTransform),
-        FILL_COMPONENT_DATA(moss::Physics),
-        FILL_COMPONENT_DATA(moss::Material),
-        FILL_RENDERABLE_DATA(moss::RectRenderable),
-        FILL_RENDERABLE_DATA(moss::CircleRenderable),
-        FILL_RENDERABLE_DATA(moss::PolyRenderable),
-        FILL_RENDERABLE_DATA(moss::RegPolyRenderable),
+        FILL_COMPONENT_DATA(components::Transform),
+        FILL_COMPONENT_DATA(components::Physics),
+        FILL_COMPONENT_DATA(components::Material)
     };
 }
 
@@ -86,30 +78,25 @@ std::unique_ptr<moss::Scene>& moss::App::getScene(const char* id) {
 }
 
 std::unique_ptr<moss::Scene>& moss::App::getCurrentScene() {
-    return m_registry.get<std::unique_ptr<Scene>>(*m_registry.view<CurrentSceneTag>().begin());
+    return m_registry.get<std::unique_ptr<Scene>>(*m_registry.view<components::engine::CurrentSceneTag>().begin());
 }
 
 
 ////////////////////////
 //// -- Builders -- ////
 ////////////////////////
-moss::App::~App() { raylib::CloseWindow(); }
+moss::App::~App() { }
 moss::App::App() {
-    // -- Load Window Config -- //
-    json windowConfig = json::parse(std::ifstream("data/renderConfig.json"))["window"];
-    ERROR_IF(windowConfig.empty(), "WindowConfig found empty {}");
+    json renderConfig;
+    utils::config::readConfig(renderConfig, "data/renderConfig.json");
 
-    // -- Initialize Raylib -- //
-    raylib::SetTraceLogLevel(raylib::LOG_WARNING);
-    raylib::InitWindow(
-        windowConfig["windowDimensions"][0].get<glm::u16>(),
-        windowConfig["windowDimensions"][1].get<glm::u16>(),
-        windowConfig["title"].get<std::string>().c_str()
-    );
-    raylib::SetTargetFPS(windowConfig["targetFPS"].get<glm::u16>());
+    /* -- Register Renderer -- */
+    for (const auto& [rendererName, active] : renderConfig["renderers"].items()) {
+        auto it = m_renderRegistry.find(rendererName);
+        WARN_IF(it == m_componentRegistry.end(), "Renderer \"{}\" not found in componentRegister", rendererName);
 
+        if (!active) continue;
 
-    // -- Initialize Camera -- //
-    entt::entity cameraEntity = m_registry.create();
-    m_registry.emplace<raylib::Camera2D>(cameraEntity);
+        it.second(m_renderer, )
+    }
 }

@@ -110,16 +110,17 @@ inline void from_json(const json& j, glm::vec4& vec) {
         registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
     }
 
+// define REGISTER_COMPONENT_[TRANSFORM, MATERIAL...]
+// ...
+// define REGISTER_RENDERER
+
 /////////////////////////////////////////////////
 //// -- Standard components serialization -- ////
 /////////////////////////////////////////////////
 namespace moss {
 
-/*SERIALIZE_COMPONENT(moss::RectTransform, position, size, rotation);*/
-/*SERIALIZE_COMPONENT(moss::CircleTransform, position, radius);*/
-/*SERIALIZE_COMPONENT(moss::PolyTransform, points);*/
-/*SERIALIZE_COMPONENT(moss::RegPolyTransform, position, numPoints, radius, rotation);*/
-/*SERIALIZE_COMPONENT(moss::Physics, velocity, acceleration, mass, elasticity);*/
-/*SERIALIZE_COMPONENT(moss::Material, color, thickness, fill);*/
+SERIALIZE_COMPONENT(components::Transform, position, scale, rotation);
+SERIALIZE_COMPONENT(components::Physics, velocity, acceleration, mass, elasticity);
+SERIALIZE_COMPONENT(components::Material, albedo);
 
 } // moss

@@ -39,8 +39,8 @@ struct Transform : Component {
 struct Physics : Component {
     glm::f32vec2 velocity;
     glm::f32vec2 acceleration;
-    glm::f32 elasticity;
     glm::f32 mass;
+    glm::f32 elasticity;
 };
 
 struct Material : Component {

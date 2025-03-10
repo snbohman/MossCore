@@ -41,7 +41,7 @@ static int infoStep3 = 0;
 }
 
 #define WARN_IF(statement, message, ...) if (statement) { \
-    WARN(message); \
+    WARN(message, __VA_ARGS__); \
 }
 
 

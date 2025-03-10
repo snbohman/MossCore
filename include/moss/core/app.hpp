@@ -8,7 +8,8 @@ Core application.
 #pragma once
 
 #include <moss/core/scene.hpp>
-#include <moss/defines.hpp>
+#include <moss/meta/defines.hpp>
+#include <moss/render/render.hpp>
 #include <memory>
 
 
@@ -33,6 +34,7 @@ private:
 
     entt::registry m_registry;
     moss::types::ComponentRegistry m_componentRegistry;
+    std::shared_ptr<Renderer> m_renderer;
 };
 
 } // moss
