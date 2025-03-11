@@ -34,6 +34,7 @@ private:
 
     entt::registry m_registry;
     moss::types::ComponentRegistry m_componentRegistry;
+    moss::types::ComponentRegistry m_renderRegistry;
     std::shared_ptr<Renderer> m_renderer;
 };
 

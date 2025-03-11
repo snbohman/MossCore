@@ -54,12 +54,11 @@ inline void from_json(const json& j, glm::vec4& vec) {
 
 } // glm
 
-
-/////////////////////////////////////
-//// -- Serialization defines -- ////
-/////////////////////////////////////
 #define SERIALIZE_COMPONENT(component, ...)  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(component, __VA_ARGS__);
 
+///////////////////////////////
+//// -- Fill Components -- ////
+///////////////////////////////
 #define FILL_COMPONENT_DATA(component) { \
     #component, \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
@@ -89,6 +88,9 @@ inline void from_json(const json& j, glm::vec4& vec) {
     } \
 }
 
+///////////////////////////////////
+//// -- Regsiter Components -- ////
+///////////////////////////////////
 #define REGISTER_COMPONENT(component) componentRegistry[#component] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
@@ -105,14 +107,14 @@ inline void from_json(const json& j, glm::vec4& vec) {
         s->init(initCrate); \
     }
 
+////////////////////////////////////
+//// -- Register Renderables -- ////
+////////////////////////////////////
 #define REGISTER_RENDERABLE(renderable) componentRegistry[#renderable] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
     }
 
-// define REGISTER_COMPONENT_[TRANSFORM, MATERIAL...]
-// ...
-// define REGISTER_RENDERER
 
 /////////////////////////////////////////////////
 //// -- Standard components serialization -- ////
