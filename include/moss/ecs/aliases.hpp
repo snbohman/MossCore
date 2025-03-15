@@ -1,6 +1,6 @@
 /*
 
-Creates inline namespaces to abbreviate longer
+inline namespaces to abbreviate longer
 namespaces.
 
 Only available for code outside the ecs libary,
@@ -16,9 +16,9 @@ as it would imply self inclusion.
 
 namespace moss {
 
-namespace cmp { using namespace components; }
-namespace rnd { using namespace renderables; }
-namespace pkg { using namespace packages; }
-namespace sys { using namespace systems; }
+namespace cmp  { using namespace components; }
+namespace rcmp { using namespace renderables; }
+namespace pkg  { using namespace packages; }
+namespace sys  { using namespace systems; }
 
 }

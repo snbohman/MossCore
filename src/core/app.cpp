@@ -64,9 +64,8 @@ void moss::App::buildAttachmentRegistry(types::AttachmentRegistry& attachmentReg
         FILL_COMPONENT_DATA(cmp::RigidBody),
         FILL_COMPONENT_DATA(cmp::RectCollider),
         FILL_COMPONENT_DATA(cmp::Material),
-        FILL_RENDERABLE_DATA(rnd::Circle),
-        FILL_RENDERER_DATA(render::MRLS),
-        /*FILL_RENDERER_DATA(render::Vulkan)*/
+        FILL_RENDERABLE_DATA(rcmp::Circle),
+        FILL_RENDERER_DATA(rnd::MRLS)
     };
 }
 

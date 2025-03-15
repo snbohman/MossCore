@@ -43,7 +43,7 @@ void MRLS::drawRenderable(const std::unique_ptr<Renderable>& renderable) {
     WARN("Renderable draw call with type input \"{}-renderable\" not defined", boost::typeindex::type_id<decltype(*renderable)>().pretty_name());
 }
 
-void MRLS::drawRenderable(const std::unique_ptr<rnd::Circle>& renderable) {
+void MRLS::drawRenderable(const std::unique_ptr<rcmp::Circle>& renderable) {
     DrawCircleV(
         utils::raylib::glmToRaylib<glm::f32vec2, Vector2>(renderable->transform.position),
         renderable->shape.radius,

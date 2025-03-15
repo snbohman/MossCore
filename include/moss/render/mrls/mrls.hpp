@@ -20,7 +20,7 @@ of use.
 
 namespace moss::render {
 
-class MRLS : Renderer {
+class MRLS : public Renderer {
 public:
     void init() override;
     void tick(sys::TickCrate crate) override;
@@ -29,7 +29,7 @@ public:
 
 private:
     void drawRenderable(const std::unique_ptr<Renderable>& renderable);
-    void drawRenderable(const std::unique_ptr<rnd::Circle>& renderable);
+    void drawRenderable(const std::unique_ptr<rcmp::Circle>& renderable);
 
     json windowConfig;
 };
