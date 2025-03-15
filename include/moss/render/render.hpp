@@ -1,13 +1,5 @@
 #pragma once
 
-#include <moss/ecs/systems.hpp>
-
-
-namespace moss {
-
-class Renderer : public moss::System {
-public:
-    virtual bool shouldClose();
-};
-
-} // moss
+#include <moss/render/vulkan/vulkan.hpp>
+#include <moss/render/mrls/mrls.hpp>
+#include <moss/render/primitives.hpp>

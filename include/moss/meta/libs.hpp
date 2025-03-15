@@ -11,6 +11,7 @@ is *common/global* usage for moss.
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
+#include <boost/type_index.hpp>
 
 #include <nlohmann/json.hpp>
 using nlohmann::json;

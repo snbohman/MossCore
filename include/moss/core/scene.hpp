@@ -1,8 +1,14 @@
 /*
-core/scene.hpp - App
 
 Handles the ecs of the scene. Has a unique
 registry, only including entities of the scene.
+
+Id is a char that the scene holds.
+
+Is owned by App. The current scene has a tag
+applied. The Scene class is techincally a system
+attatched to an entity. The scene includes an id
+set by the user.
 
 */
 
@@ -10,22 +16,27 @@ registry, only including entities of the scene.
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <moss/ecs/systems.hpp>
+#include <moss/ecs/ecs.hpp>
 #include <moss/meta/defines.hpp>
 
 
 namespace moss {
 
-struct SceneInitCrate {
+namespace scene {
+
+struct InitCrate {
     const char* id;
-    const moss::types::ComponentRegistry& componentRegistry;
+    const types::AttachmentRegistry& componentRegistry;
 };
+
+}
 
 class Scene : public System {
 public:
     // -- Special init for scene system -- //
-    Scene(moss::SceneInitCrate crate);
-    void tick(moss::SystemTickCrate crate) override;
+    // -- Therefor a builder -- //
+    Scene(scene::InitCrate crate);
+    void tick() override;
 
     const char* id;
     entt::registry registry;

@@ -10,29 +10,23 @@ that a *sprite* may have, as an example.
 #pragma once
 
 #include <moss/meta/libs.hpp>
+#include <moss/ecs/primitives.hpp>
 #include <moss/ecs/components.hpp>
 #include <moss/ecs/systems.hpp>
 
 
-namespace moss {
+namespace moss::packages {
 
-struct Package {
-    ~Package() = default;
-};
-
-namespace packages {
-
-struct Physics : Package {
-    components::Physics component;
-    systems::Physics system;
+struct RigidBody : Package {
+    components::RigidBody component;
+    systems::RigidBody system;
 };
 
 struct Sprite : Package {
     components::Transform transform;
     components::Material material;
-    components::Renderable renderable;
-    packages::Physics physicsPackage;
+    packages::RigidBody physicsPackage;
+    Renderable renderable;
 };
 
-} // packages
-} // moss
+} // moss::package

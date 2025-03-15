@@ -4,6 +4,7 @@ render/vulkan.hpp
 Main render system/class for the vulkan API. This together with raylib
 are the only rendering alternatives. Inside the moss::render namespace.
 
+                    *-- INIT NOTES --*
     Create a VkInstance
     Select a supported graphics card (VkPhysicalDevice)
     Create a VkDevice and VkQueue for drawing and presentation
@@ -19,9 +20,9 @@ are the only rendering alternatives. Inside the moss::render namespace.
 
 #pragma once
 
-#include <moss/meta/vulkanLibs.hpp>
 #include <moss/meta/libs.hpp>
-#include <moss/render/render.hpp>
+#include <moss/meta/vulkanLibs.hpp>
+#include <moss/render/primitives.hpp>
 
 
 namespace moss::render {

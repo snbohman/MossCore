@@ -1,12 +1,12 @@
 /*
-render/vulkan.cpp - parentless
+render/vulkan.cpp
 
 Implements render/vulkan.hpp
 
 */
 
 #include <moss/meta/vulkanLibs.hpp>
-#include <moss/render/vulkan.hpp>
+#include <moss/render/vulkan/vulkan.hpp>
 #include <moss/utils/utils.hpp>
 
 
@@ -63,8 +63,8 @@ void Vulkan::initWindow() {
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(
-        windowConfig["width"].get<glm::u32>(),
-        windowConfig["height"].get<glm::u32>(),
+        windowConfig["dimensions"]["width"].get<glm::u32>(),
+        windowConfig["dimensions"]["height"].get<glm::u32>(),
         windowConfig["title"].get<std::string>().c_str(),
         nullptr, nullptr
     );

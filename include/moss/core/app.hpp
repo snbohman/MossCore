@@ -8,22 +8,30 @@ Core application.
 #pragma once
 
 #include <moss/core/scene.hpp>
-#include <moss/meta/defines.hpp>
 #include <moss/render/render.hpp>
+#include <moss/meta/defines.hpp>
 #include <memory>
 
 
 namespace moss {
 
+namespace app {
+
+struct InitCrate {
+    const char* dataDirectory = "data";
+};
+
+} // app
+
 class App {
 public:
-    App();
+    App(app::InitCrate crate);
     ~App();
     void run();
 
     void addScene(const char* id, const bool& currentScene);
-    void buildComponentRegistry(moss::types::ComponentRegistry& componentRegistry);
-    void setComponentRegistry(const moss::types::ComponentRegistry& componentRegistry);
+    void buildAttachmentRegistry(types::AttachmentRegistry& componentRegistry);
+    void setAttachmentRegistry(const types::AttachmentRegistry& componentRegistry);
     void setCurrentScene(const char* id);
 
 private:
@@ -33,8 +41,7 @@ private:
     std::unique_ptr<moss::Scene>& getCurrentScene();
 
     entt::registry m_registry;
-    moss::types::ComponentRegistry m_componentRegistry;
-    moss::types::ComponentRegistry m_renderRegistry;
+    moss::types::AttachmentRegistry m_attachmentRegistry;
     std::shared_ptr<Renderer> m_renderer;
 };
 

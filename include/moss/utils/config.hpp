@@ -1,7 +1,7 @@
 /*
-utils/config.hpp - parentless
+utils/config.hpp
 
-Implements utils::json with relevant helper functions.
+Implements utils::config with relevant reading functions.
 
 */
 
@@ -13,11 +13,12 @@ Implements utils::json with relevant helper functions.
 
 namespace moss::utils::config {
 
-inline void readConfig(json& j, const char* configPath) {
+inline void readConfig(json& j, const char* config, const char* dataDir="data") {
+    static const char* dataDirectory = std::string(dataDir) == "data" ? "data" : dataDir;
+    const std::string configPath = fmt::format("{}/{}", dataDirectory, configPath);
+
     j = json::parse(std::fstream(configPath));
-    if (j.empty()) {
-        ERROR("Json config from \"{}\" read empty", configPath);
-    }
+    ERROR_IF(j.empty(), "Json config from path \"{}\" found empty", configPath);
 }
 
 } // moss::utils::json

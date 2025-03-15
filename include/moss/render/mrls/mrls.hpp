@@ -15,23 +15,22 @@ of use.
 
 #include <moss/meta/libs.hpp>
 #include <moss/meta/raylibLibs.hpp>
-#include <moss/render/render.hpp>
-
+#include <moss/ecs/ecs.hpp>
+#include <moss/render/primitives.hpp>
 
 namespace moss::render {
 
 class MRLS : Renderer {
 public:
     void init() override;
-    void tick() override;
+    void tick(sys::TickCrate crate) override;
     void exit() override;
     bool shouldClose() override;
 
-    // - Handy API - //
-    void beginDrawing();
-    void endDrawing();
-
 private:
+    void drawRenderable(const std::unique_ptr<Renderable>& renderable);
+    void drawRenderable(const std::unique_ptr<rnd::Circle>& renderable);
+
     json windowConfig;
 };
 

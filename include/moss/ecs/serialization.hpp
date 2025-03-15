@@ -4,7 +4,8 @@ ecs/serialization.hpp - parentless
 Serializes the standard components and 
 includes all of the serialization of glm.
 Also defines handy macros for user use
-when serializing entity attatchements.
+when serializing entity attatchements and
+registering entity attatchments.
 
 */
 
@@ -12,6 +13,7 @@ when serializing entity attatchements.
 
 #include <moss/meta/libs.hpp>
 #include <moss/ecs/components.hpp>
+#include <moss/ecs/renderables.hpp>
 #include <memory.h>
 
 
@@ -52,17 +54,36 @@ inline void from_json(const json& j, glm::vec4& vec) {
     vec.a = j[3].get<float>();
 }
 
+// -- json <-> glm::u32vec4 -- //
+inline void to_json(json& j, const glm::u32vec4& v) {
+    j = json::array({ v.x, v.y, v.z, v.a });
+}
+
+inline void from_json(const json& j, glm::u32vec4& vec) {
+    vec.x = j[0].get<float>();
+    vec.y = j[1].get<float>();
+    vec.z = j[2].get<float>();
+    vec.a = j[3].get<float>();
+}
+
 } // glm
 
 #define SERIALIZE_COMPONENT(component, ...)  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(component, __VA_ARGS__);
 
-///////////////////////////////
-//// -- Fill Components -- ////
-///////////////////////////////
+////////////////////////////////
+//// -- Fill Attachments -- ////
+////////////////////////////////
 #define FILL_COMPONENT_DATA(component) { \
     #component, \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
+    } \
+}
+
+#define FILL_RENDERABLE_DATA(renderable) { \
+    #renderable, \
+    [](entt::registry& registry, entt::entity& entity, const json& data) { \
+        registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>(data.get<renderable>())); \
     } \
 }
 
@@ -73,7 +94,7 @@ inline void from_json(const json& j, glm::vec4& vec) {
     } \
 }
 
-#define FILL_SYSTEM_DATA(sys) { \
+#define FILL_SYSTEM_DATA(sys, initCrate) { \
     #sys, \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
@@ -81,38 +102,38 @@ inline void from_json(const json& j, glm::vec4& vec) {
     } \
 }
 
-#define FILL_RENDERABLE_DATA(renderable) { \
-    #renderable, \
+#define FILL_RENDERER_DATA(renderer) { \
+    #renderer, \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
-        registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
+        auto& r = registry.emplace<std::unique_ptr<moss::Renderer>>(entity, std::make_unique<renderer>()); \
+        r->init(); \
     } \
 }
 
-///////////////////////////////////
-//// -- Regsiter Components -- ////
-///////////////////////////////////
-#define REGISTER_COMPONENT(component) componentRegistry[#component] = \
+
+////////////////////////////////////
+//// -- Regsiter Attachments -- ////
+////////////////////////////////////
+#define REGISTER_COMPONENT(component) attachmentRegistry[#component] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
     }
 
-#define REGISTER_TAG(tag) componentRegistry[#tag] = \
+#define REGISTER_TAG(tag) attachmentRegistry[#tag] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<tag>(entity); \
     }
 
-#define REGISTER_SYSTEM(sys, initCrate) componentRegistry[#sys] = \
+#define REGISTER_SYSTEM(sys, initCrate) attachmentRegistry[#sys] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
         s->init(initCrate); \
     }
 
-////////////////////////////////////
-//// -- Register Renderables -- ////
-////////////////////////////////////
-#define REGISTER_RENDERABLE(renderable) componentRegistry[#renderable] = \
+#define REGISTER_RENDERER(renderer) attachmentRegistry[#renderer] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
-        registry.emplace<std::unique_ptr<moss::Renderable>>(entity, std::make_unique<renderable>()); \
+        auto& r = registry.emplace<std::unique_ptr<moss::Renderer>>(entity, std::make_unique<renderer>()); \
+        r->init() \
     }
 
 
@@ -121,8 +142,18 @@ inline void from_json(const json& j, glm::vec4& vec) {
 /////////////////////////////////////////////////
 namespace moss {
 
-SERIALIZE_COMPONENT(components::Transform, position, scale, rotation);
-SERIALIZE_COMPONENT(components::Physics, velocity, acceleration, mass, elasticity);
-SERIALIZE_COMPONENT(components::Material, albedo);
+namespace components {
+
+    SERIALIZE_COMPONENT(components::Transform, position, scale, rotation);
+    SERIALIZE_COMPONENT(components::RigidBody, velocity, acceleration, mass, elasticity);
+    SERIALIZE_COMPONENT(components::RectCollider, transform);
+    SERIALIZE_COMPONENT(components::Material, albedo, thickness, fill);
+
+}
+
+namespace renderables {
+    SERIALIZE_COMPONENT(renderables::Circle::Shape, radius);
+    SERIALIZE_COMPONENT(renderables::Circle, transform, material, shape);
+}
 
 } // moss
