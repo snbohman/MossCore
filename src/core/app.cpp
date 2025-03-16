@@ -26,14 +26,19 @@ void moss::App::run() {
 }
 
 void moss::App::addScene(const char* id, const bool& currentScene) {
-    INFO_INIT("Initializing scene \"{}\"", 3, id);
+    INFO_INIT("Attaching scene \"{}\"", 1, id);
 
     // -- Check for already existing scene -- //
+    INFO_INITF("Checking for scene duplicates", 2);
     for (const entt::entity& entity : m_registry.view<Scene>()) {
-        if (m_registry.get<std::unique_ptr<Scene>>(entity)->id == id) ERROR("Scene registered with id \"{}\" already exists", id);
+        ERROR_IF(
+            m_registry.get<std::unique_ptr<Scene>>(entity)->id == id,
+            "Scene registered with id \"{}\" already exists", id
+        );
     }
 
     // -- Register Scene -- //
+    INFO_INITF("Attaching scene to registry", 2);
     entt::entity sceneEntity = m_registry.create();
     std::unique_ptr<Scene>& scene = m_registry.emplace<std::unique_ptr<Scene>>(sceneEntity, std::make_unique<Scene>(scene::InitCrate{id, m_attachmentRegistry}));
 
@@ -46,7 +51,7 @@ void moss::App::addScene(const char* id, const bool& currentScene) {
 }
 
 void moss::App::setCurrentScene(const char* id) {
-    INFO_INIT("Making scene \"{}\" current", 3, id);
+    INFO_INIT("Making scene \"{}\" current", 2, id);
 
     for (const entt::entity& entity : m_registry.view<Scene>()) {
         if (m_registry.get<std::unique_ptr<Scene>>(entity)->id == id) {
@@ -60,12 +65,12 @@ void moss::App::setCurrentScene(const char* id) {
 }
 
 void moss::App::setAttachmentRegistry(const types::AttachmentRegistry& attachmentRegistry) {
-    INFO_INITF("Moving attatchment registry", 3);
+    INFO_INITF("Moving attachment registry", 3);
     m_attachmentRegistry = std::move(attachmentRegistry);
 }
 
 void moss::App::buildAttachmentRegistry(types::AttachmentRegistry& attachmentRegistry) {
-    INFO_INITF("Building attatchment registry", 3);
+    INFO_INITF("Building attachment registry", 3);
     attachmentRegistry = {
         FILL_COMPONENT_DATA(moss::components::Transform),
         FILL_COMPONENT_DATA(moss::components::RigidBody),
@@ -111,20 +116,21 @@ std::unique_ptr<moss::Scene>& moss::App::getCurrentScene() {
 //// -- Init -- ////
 ////////////////////
 void moss::App::init(app::InitCrate crate) {
-    INFO_INITF("Reading renderConfig", 1);
+    INFO_INITF("Initializing App", 1);
 
-    json renderConfig;
-    utils::config::readConfig(renderConfig, "renderConfig.json", crate.dataDirectory);
+    INFO_INITF("Reading renderConfig", 2);
+    json renderConfig; utils::config::readConfig(renderConfig, "renderConfig.json", crate.dataDirectory);
+    const auto renderers = renderConfig["renderers"];
 
     // -- Register Renderer -- //
-    INFO_INITF("Initializing renderer", 2);
+    INFO_INIT("Attaching renderer of {} possible", 2, renderers.size());
     entt::entity renderEntity = m_registry.create();
-    for (const auto& [rendererName, active] : renderConfig["renderers"].items()) {
+    for (const auto& [rendererName, active] : renderers.items()) {
         auto it = m_attachmentRegistry.find(rendererName);
         WARN_IF(it == m_attachmentRegistry.end(), "Renderer \"{}\" not found in attachmentRegistry", rendererName);
 
         if (active) {
-            INFO_INIT("Renderer \"{}\" initialized", 3, rendererName);
+            INFO_INIT("Renderer \"{}\" attached", 3, rendererName);
             it->second(m_registry, renderEntity, {});
             m_renderer = m_registry.get<std::unique_ptr<Renderer>>(renderEntity).get();
             break;

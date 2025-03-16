@@ -18,7 +18,7 @@ namespace moss::utils::raylib {
 
 template<typename T, typename U>
 inline U glmToRaylib(const T& vec) {
-    ERROR_IF(sizeof(T) == 0, "Unsupported vector type \"{}\"", boost::typeindex::type_id<T>().pretty_name());
+    WARN("Unsupported vector type \"{}\"", boost::typeindex::type_id<T>().pretty_name());
 
     return U(); // for warning purposes, it quits anyway
 }
@@ -26,19 +26,19 @@ inline U glmToRaylib(const T& vec) {
 // Specialization for glm::vec2 -> Vector2
 template<>
 inline Vector2 glmToRaylib<glm::vec2, Vector2>(const glm::vec2& vec) {
-    return Vector2{vec.x, vec.y};
+    return Vector2 { vec.x, vec.y };
 }
 
 // Specialization for glm::vec3 -> Vector3
 template<>
 inline Vector3 glmToRaylib<glm::vec3, Vector3>(const glm::vec3& vec) {
-    return Vector3{vec.x, vec.y, vec.z};
+    return Vector3 { vec.x, vec.y, vec.z };
 }
 
 // Specialization for glm::vec4 -> Vector4
 template<>
 inline Vector4 glmToRaylib<glm::vec4, Vector4>(const glm::vec4& vec) {
-    return Vector4{vec.x, vec.y, vec.z, vec.w};
+    return Vector4 { vec.x, vec.y, vec.z, vec.w };
 }
 
 inline Rectangle glmToRect(const glm::vec2& pos, const glm::vec2& size) {

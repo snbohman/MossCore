@@ -114,23 +114,23 @@ inline void from_json(const json& j, glm::u32vec4& vec) {
 ////////////////////////////////////
 //// -- Regsiter Attachments -- ////
 ////////////////////////////////////
-#define REGISTER_COMPONENT(component) attachmentRegistry[#component] = \
+#define REGISTER_COMPONENT(attachmentRegistry, component) attachmentRegistry[#component] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<component>(entity, data.get<component>()); \
     }
 
-#define REGISTER_TAG(tag) attachmentRegistry[#tag] = \
+#define REGISTER_TAG(attachmentRegistry, tag) attachmentRegistry[#tag] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         registry.emplace<tag>(entity); \
     }
 
-#define REGISTER_SYSTEM(sys, initCrate) attachmentRegistry[#sys] = \
+#define REGISTER_SYSTEM(attachmentRegistry, sys, initCrate) attachmentRegistry[#sys] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         auto& s = registry.emplace<std::unique_ptr<moss::System>>(entity, std::make_unique<sys>()); \
         s->init(initCrate); \
     }
 
-#define REGISTER_RENDERER(renderer) attachmentRegistry[#renderer] = \
+#define REGISTER_RENDERER(attachmentRegistry, renderer) attachmentRegistry[#renderer] = \
     [](entt::registry& registry, entt::entity& entity, const json& data) { \
         auto& r = registry.emplace<std::unique_ptr<moss::Renderer>>(entity, std::make_unique<renderer>()); \
         r->init() \

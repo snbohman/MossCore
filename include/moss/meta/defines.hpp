@@ -24,9 +24,9 @@ namespace moss {
 //// -- Macros -- ////
 //////////////////////
 
-static int infoStep1 = 0;
-static int infoStep2 = 0;
-static int infoStep3 = 0;
+extern int infoStep1;
+extern int infoStep2;
+extern int infoStep3;
 #define INFO_INIT(message, infoStep, ...) \
     if (infoStep == 1) { infoStep1++; infoStep2 = 0; infoStep3 = 0; } \
     else if (infoStep == 2) { infoStep2++;  infoStep3 = 0; } \
@@ -45,6 +45,9 @@ static int infoStep3 = 0;
 #define DEB(message, ...) spdlog::debug("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__))
 #define INFO(message, ...) spdlog::info("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__))
 
+#define ERRORF(message) spdlog::error("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message); std::exit(0);
+#define WARNF(message) spdlog::warn("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message)
+#define INFOF(message) spdlog::info("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message)
 #define DEBF(message) spdlog::debug("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message)
 
 #define ERROR_IF(statement, message, ...) if (statement) { \

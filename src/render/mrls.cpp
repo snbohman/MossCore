@@ -14,15 +14,26 @@ Main hub for implementing mrls.
 using namespace moss::render;
 
 void MRLS::init() {
+    INFO_INITF("Initializing MRLS renderer", 1);
+
+    INFO_INITF("Reading mrlsConfig.json", 2);
+    json mrlsConfig; utils::config::readConfig(mrlsConfig, "mrlsConfig.json");
+
+    INFO_INITF("Reading windowConfig.json", 2);
     json windowConfig; utils::config::readConfig(windowConfig, "windowConfig.json");
+    const auto width = windowConfig["dimensions"][0].get<glm::u32>();
+    const auto height = windowConfig["dimensions"][1].get<glm::u32>();
+    const auto title = windowConfig["title"].get<std::string>();
+    const auto targetFPS = windowConfig["targetFPS"].get<glm::f32>();
+
+    INFO_INITF("Setting raylib trace level to WARN", 2);
     SetTraceLogLevel(LOG_WARNING);
 
-    InitWindow(
-        windowConfig["dimensions"][0].get<glm::u32>(),
-        windowConfig["dimensions"][1].get<glm::u32>(),
-        windowConfig["title"].get<std::string>().c_str()
-    );
-    SetTargetFPS(windowConfig["targetFPS"].get<glm::f32>());
+    INFO_INIT("Initializing Raylib Window with dimensions [{}-{}] and title \"{}\"", 2, width, height, title)
+    InitWindow(width, height, title.c_str());
+
+    INFO_INIT("Setting target-FPS to {}", 2, targetFPS);
+    SetTargetFPS(targetFPS);
 }
 
 void MRLS::tick(sys::TickCrate crate) {
@@ -56,6 +67,6 @@ void MRLS::drawRenderable(const rcmp::Circle* renderable) {
     DrawCircleV(
         utils::raylib::glmToRaylib<glm::f32vec2, Vector2>(renderable->transform.position),
         renderable->shape.radius,
-        ColorFromNormalized(utils::raylib::glmToRaylib<glm::u32vec4, Vector4>(renderable->material.albedo))
+        ColorFromNormalized(utils::raylib::glmToRaylib<glm::f32vec4, Vector4>(renderable->material.albedo))
     );
 }
