@@ -29,21 +29,15 @@ void MRLS::tick(sys::TickCrate crate) {
     BeginDrawing();
     ClearBackground(BLACK);
 
-    /*for (const auto& e : crate.registry.view<std::unique_ptr<Renderable>>()) {*/
-    /*    auto& renderable = crate.registry.get<std::unique_ptr<Renderable>>(e);*/
-    /**/
-    /*    if (auto* circle = dynamic_cast<rcmp::Circle*>(renderable.get())) {*/
-    /*        drawRenderable(circle);*/
-    /*    } else {*/
-    /*        drawRenderable(renderable);*/
-    /*    }*/
-    /*}*/
+    for (const auto& e : crate.registry.view<std::unique_ptr<Renderable>>()) {
+        auto& renderable = crate.registry.get<std::unique_ptr<Renderable>>(e);
 
-    DrawCircleV(
-        {0, 0},
-        10,
-        {1, 0, 0, 1}
-    );
+        if (auto* circle = dynamic_cast<rcmp::Circle*>(renderable.get())) {
+            drawRenderable(circle);
+        } else {
+            drawRenderable(renderable);
+        }
+    }
 
     EndDrawing();
 }

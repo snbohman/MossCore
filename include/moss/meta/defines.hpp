@@ -45,6 +45,8 @@ static int infoStep3 = 0;
 #define DEB(message, ...) spdlog::debug("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__))
 #define INFO(message, ...) spdlog::info("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, fmt::format(message, __VA_ARGS__))
 
+#define DEBF(message) spdlog::debug("[{}]-[{}]-[{}]: {}", __FILE__, __FUNCTION__, __LINE__, message)
+
 #define ERROR_IF(statement, message, ...) if (statement) { \
     ERROR(message, __VA_ARGS__); \
 }
