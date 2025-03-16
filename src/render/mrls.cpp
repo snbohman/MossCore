@@ -49,7 +49,7 @@ bool MRLS::shouldClose() { return WindowShouldClose(); }
 //// -- DRAW -- ////
 ////////////////////
 void MRLS::drawRenderable(const std::unique_ptr<Renderable>& renderable) {
-    WARN("Renderable draw call with type input \"{}-renderable\" not defined", boost::typeindex::type_id<decltype(*renderable)>().pretty_name());
+    WARN("Renderable render call with input \"{}-renderable\" not defined", boost::typeindex::type_id<decltype(*renderable)>().pretty_name());
 }
 
 void MRLS::drawRenderable(const rcmp::Circle* renderable) {
