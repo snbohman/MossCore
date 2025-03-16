@@ -25,14 +25,17 @@ namespace moss {
 /////////////////////////
 struct Component {
 public:
-    ~Component() = default;
+    virtual ~Component() = default;
 };
 
 
 //////////////////////////
 //// -- Renderable -- ////
 //////////////////////////
-struct Renderable : Component { };
+struct Renderable : Component {
+public:
+    virtual ~Renderable() = default;
+};
 
 
 ///////////////////////
@@ -40,7 +43,7 @@ struct Renderable : Component { };
 ///////////////////////
 struct Package {
 public:
-    ~Package() = default;
+    virtual ~Package() = default;
 };
 
 
@@ -68,7 +71,7 @@ struct ExitCrate {
 class System {
 public:
     System() = default;
-    ~System() = default;
+    virtual ~System() = default;
 
     inline virtual void init() { }
     inline virtual void tick() { }

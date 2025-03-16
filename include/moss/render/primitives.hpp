@@ -7,7 +7,10 @@ namespace moss {
 
 class Renderer : public System {
 public:
-    virtual bool shouldClose();
+    Renderer() = default;
+    virtual ~Renderer() = default;
+
+    virtual bool shouldClose() = 0;
 };
 
 } // moss

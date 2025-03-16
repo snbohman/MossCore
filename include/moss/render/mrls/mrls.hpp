@@ -22,6 +22,9 @@ namespace moss::render {
 
 class MRLS : public Renderer {
 public:
+    MRLS() { }
+    ~MRLS() { }
+
     void init() override;
     void tick(sys::TickCrate crate) override;
     void exit() override;
@@ -29,7 +32,7 @@ public:
 
 private:
     void drawRenderable(const std::unique_ptr<Renderable>& renderable);
-    void drawRenderable(const std::unique_ptr<rcmp::Circle>& renderable);
+    void drawRenderable(const rcmp::Circle* renderable);
 
     json windowConfig;
 };

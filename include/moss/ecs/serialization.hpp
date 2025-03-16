@@ -143,12 +143,10 @@ inline void from_json(const json& j, glm::u32vec4& vec) {
 namespace moss {
 
 namespace components {
-
     SERIALIZE_COMPONENT(components::Transform, position, scale, rotation);
     SERIALIZE_COMPONENT(components::RigidBody, velocity, acceleration, mass, elasticity);
     SERIALIZE_COMPONENT(components::RectCollider, transform);
     SERIALIZE_COMPONENT(components::Material, albedo, thickness, fill);
-
 }
 
 namespace renderables {

@@ -25,8 +25,10 @@ struct InitCrate {
 
 class App {
 public:
-    App(app::InitCrate crate);
-    ~App();
+    inline App() { spdlog::set_pattern("[\e[1;32mMOSS\e[0m] [%^%L%$] %v"); };
+    inline ~App() { };
+
+    void init(app::InitCrate crate);
     void run();
 
     void addScene(const char* id, const bool& currentScene);
@@ -42,7 +44,7 @@ private:
 
     entt::registry m_registry;
     moss::types::AttachmentRegistry m_attachmentRegistry;
-    std::shared_ptr<Renderer> m_renderer;
+    Renderer* m_renderer;
 };
 
 } // moss

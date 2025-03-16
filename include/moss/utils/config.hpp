@@ -13,12 +13,19 @@ Implements utils::config with relevant reading functions.
 
 namespace moss::utils::config {
 
-inline void readConfig(json& j, const char* config, const char* dataDir="data") {
-    static const char* dataDirectory = std::string(dataDir) == "data" ? "data" : dataDir;
-    const std::string configPath = fmt::format("{}/{}", dataDirectory, configPath);
+inline void readConfig(json& j, const std::string& config, const std::string& dataDir="data") {
+    static std::string dataDirectory = dataDir;
+    if (dataDirectory == "data" && dataDir != "data") {
+        dataDirectory = dataDir;
+    }
 
-    j = json::parse(std::fstream(configPath));
-    ERROR_IF(j.empty(), "Json config from path \"{}\" found empty", configPath);
+    const std::string configPath = fmt::format("{}/{}", dataDirectory, config);
+
+    try {
+        j = json::parse(std::fstream(configPath));
+    } catch (std::exception e) {
+        ERROR_IF(j.empty(), "Json config from path \"{}\" found empty", configPath);
+    }
 }
 
 } // moss::utils::json
