@@ -9,7 +9,6 @@ Wrapper file for including all ecs based files.
 
 #include <moss/ecs/primitives.hpp>
 #include <moss/ecs/components.hpp>
-#include <moss/ecs/serialization.hpp>
 #include <moss/ecs/packages.hpp>
 #include <moss/ecs/systems.hpp>
 #include <moss/ecs/aliases.hpp>

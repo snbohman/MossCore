@@ -52,33 +52,36 @@ public:
 //////////////////////
 namespace systems {
 
-struct InitCrate {
-    const entt::entity& entity = entt::null;
-};
+struct Crate { };
 
-struct TickCrate {
-    const entt::entity& entity = entt::null;
+struct InitCrate : Crate { };
+
+struct BuildCrate : Crate {
+    const entt::entity& entity;
     entt::registry& registry;
 };
 
-struct ExitCrate {
-    const entt::entity& entity = entt::null;
+struct TickCrate : Crate {
+    const entt::entity& entity;
+    entt::registry& registry;
+    float deltaTime;
+};
+
+struct ExitCrate : Crate {
+    const entt::entity& entity;
     entt::registry& registry;
 };
 
 } // systems
 
+// Wrapper to make it a component in entt eyes
 class System {
-public:
-    System() = default;
-    virtual ~System() = default;
+    std::function<void()> func;
 
-    inline virtual void init() { }
-    inline virtual void tick() { }
-    inline virtual void exit() { }
-    inline virtual void init(systems::InitCrate crate) { }
-    inline virtual void tick(systems::TickCrate crate) { }
-    inline virtual void exit(systems::ExitCrate crate) { }
+    void operator () () const {
+        func();
+    }
 };
+
 
 } // moss

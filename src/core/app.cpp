@@ -7,133 +7,89 @@ Implements core/app.hpp.
 
 #include <moss/meta/libs.hpp>
 #include <moss/core/app.hpp>
-#include <moss/core/scene.hpp>
-#include <moss/render/render.hpp>
 #include <moss/ecs/ecs.hpp>
 #include <moss/utils/config.hpp>
-#include <moss/meta/defines.hpp>
-#include <memory>
 
 
-//////////////////////
-//// -- Public -- ////
-//////////////////////
-void moss::App::run() {
-    while (!m_renderer->shouldClose()) {
-        getCurrentScene()->tick();
-        m_renderer->tick({ .registry = getCurrentScene()->registry });
-    }
-}
-
-void moss::App::addScene(const char* id, const bool& currentScene) {
-    INFO_INIT("Attaching scene \"{}\"", 1, id);
-
-    // -- Check for already existing scene -- //
-    INFO_INITF("Checking for scene duplicates", 2);
-    for (const entt::entity& entity : m_registry.view<Scene>()) {
-        ERROR_IF(
-            m_registry.get<std::unique_ptr<Scene>>(entity)->id == id,
-            "Scene registered with id \"{}\" already exists", id
-        );
-    }
-
-    // -- Register Scene -- //
-    INFO_INITF("Attaching scene to registry", 2);
-    entt::entity sceneEntity = m_registry.create();
-    std::unique_ptr<Scene>& scene = m_registry.emplace<std::unique_ptr<Scene>>(sceneEntity, std::make_unique<Scene>(scene::InitCrate{id, m_attachmentRegistry}));
-
-    // -- Handle Current Scene-- //
-    if (currentScene) {
-        auto view = m_registry.view<cmp::engine::CurrentSceneTag>();
-        if (view.size() != 0) { m_registry.remove<cmp::engine::CurrentSceneTag>(*view.begin()); }
-        m_registry.emplace<cmp::engine::CurrentSceneTag>(sceneEntity);
-    }
-}
-
-void moss::App::setCurrentScene(const char* id) {
-    INFO_INIT("Making scene \"{}\" current", 2, id);
-
-    for (const entt::entity& entity : m_registry.view<Scene>()) {
-        if (m_registry.get<std::unique_ptr<Scene>>(entity)->id == id) {
-            m_registry.remove<moss::components::engine::CurrentSceneTag>(*m_registry.view<moss::components::engine::CurrentSceneTag>().begin());
-            m_registry.emplace<moss::components::engine::CurrentSceneTag>(entity);
-            return;
-        }
-    }
-
-    ERROR("Scene registered with id \"{}\" not found", id);
-}
-
-void moss::App::setAttachmentRegistry(const types::AttachmentRegistry& attachmentRegistry) {
-    INFO_INITF("Moving attachment registry", 3);
-    m_attachmentRegistry = std::move(attachmentRegistry);
-}
-
-void moss::App::buildAttachmentRegistry(types::AttachmentRegistry& attachmentRegistry) {
-    INFO_INITF("Building attachment registry", 3);
-    attachmentRegistry = {
-        FILL_COMPONENT_DATA(moss::components::Transform),
-        FILL_COMPONENT_DATA(moss::components::RigidBody),
-        FILL_COMPONENT_DATA(moss::components::RectCollider),
-        FILL_COMPONENT_DATA(moss::components::Material),
-        FILL_RENDERABLE_DATA(moss::renderables::Circle),
-        FILL_RENDERER_DATA(moss::render::MRLS),
-
-        FILL_COMPONENT_DATA(moss::cmp::Transform),
-        FILL_COMPONENT_DATA(moss::cmp::RigidBody),
-        FILL_COMPONENT_DATA(moss::cmp::RectCollider),
-        FILL_COMPONENT_DATA(moss::cmp::Material),
-        FILL_RENDERABLE_DATA(moss::rcmp::Circle),
-        FILL_RENDERER_DATA(moss::rnd::MRLS),
-
-        FILL_COMPONENT_DATA(cmp::Transform),
-        FILL_COMPONENT_DATA(cmp::RigidBody),
-        FILL_COMPONENT_DATA(cmp::RectCollider),
-        FILL_COMPONENT_DATA(cmp::Material),
-        FILL_RENDERABLE_DATA(rcmp::Circle),
-        FILL_RENDERER_DATA(rnd::MRLS)
-    };
-}
-
-///////////////////////
-//// -- Private -- ////
-///////////////////////
-std::unique_ptr<moss::Scene>& moss::App::getScene(const char* id) {
-    for (const entt::entity& e : m_registry.view<Scene>()) {
-        std::unique_ptr<Scene>& scene = m_registry.get<std::unique_ptr<Scene>>(e);
-        if (scene->id == id) { return scene; }
-    }
-
-    ERROR("Scene registered with id \"{}\" not found", id);
-}
-
-std::unique_ptr<moss::Scene>& moss::App::getCurrentScene() {
-    return m_registry.get<std::unique_ptr<Scene>>(*m_registry.view<components::engine::CurrentSceneTag>().begin());
-}
-
+using moss::App;
 
 ////////////////////
 //// -- Init -- ////
 ////////////////////
-void moss::App::init(app::InitCrate crate) {
-    INFO_INITF("Initializing App", 1);
+App& App::init() { return *this; }
 
-    INFO_INITF("Reading renderConfig", 2);
-    json renderConfig; utils::config::readConfig(renderConfig, "renderConfig.json", crate.dataDirectory);
-    const auto renderers = renderConfig["renderers"];
-
-    // -- Register Renderer -- //
-    INFO_INIT("Attaching renderer of {} possible", 2, renderers.size());
-    entt::entity renderEntity = m_registry.create();
-    for (const auto& [rendererName, active] : renderers.items()) {
-        auto it = m_attachmentRegistry.find(rendererName);
-        WARN_IF(it == m_attachmentRegistry.end(), "Renderer \"{}\" not found in attachmentRegistry", rendererName);
-
-        if (active) {
-            INFO_INIT("Renderer \"{}\" attached", 3, rendererName);
-            it->second(m_registry, renderEntity, {});
-            m_renderer = m_registry.get<std::unique_ptr<Renderer>>(renderEntity).get();
-            break;
-        }
-    }
+//////////////////////
+//// -- Create -- ////
+//////////////////////
+App& App::create() {
+    m_latest = { m_registry.create() };
+    return *this;
 }
+
+App& App::create(glm::u32 count) {
+    for (int i; i < count; i++)
+        m_latest.push_back(m_registry.create());
+    return *this;
+}
+
+/////////////////////////
+//// -- Component -- ////
+/////////////////////////
+template<typename T> App& App::attachComponent() {
+    for (const auto& entity : m_latest)
+        m_registry.emplace<T>(entity);
+
+    return *this;
+}
+
+template<typename T> App& App::attachComponent(entt::entity entity) {
+    m_registry.emplace<T>(entity);
+
+    return *this;
+}
+
+template<typename T> App& App::attachComponent(std::initializer_list<entt::entity> entities) {
+    for (const auto entity : entities)
+        m_registry.emplace<T>(entity);
+
+    return *this;
+}
+
+//////////////////////
+//// -- System -- ////
+//////////////////////
+App& App::attachSystem(const std::function<const std::unique_ptr<sys::Crate>&>& sys) {
+    for (const auto& entity : m_latest) {
+        m_registry.emplace<System>(entity, sys);
+    }
+
+    return *this;
+}
+
+App& App::attachSystem(const std::function<const std::unique_ptr<sys::Crate>&>& sys, entt::entity entity) {
+    m_registry.emplace<System>(entity, sys);
+
+    return *this;
+}
+
+App& App::attachSystem(const std::function<const std::unique_ptr<sys::Crate>&>& sys, std::initializer_list<entt::entity> entities) {
+    for (const auto& entity : entities) {
+        m_registry.emplace<System>(entity, sys);
+    }
+
+    return *this;
+}
+
+
+App& App::build(app::BuildCrate crate) { return *this; }
+
+App& App::run() {
+    // exit on windowclose, etc. should systems be able to call exit?
+    while (true) {
+
+    }
+
+    return *this;
+}
+
+void App::exit() { }

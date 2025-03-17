@@ -25,8 +25,7 @@ namespace moss {
 namespace scene {
 
 struct InitCrate {
-    const char* id;
-    const types::AttachmentRegistry& componentRegistry;
+    const std::string& id;
 };
 
 }
@@ -38,7 +37,7 @@ public:
     Scene(scene::InitCrate crate);
     void tick() override;
 
-    const char* id;
+    const std::string& id;
     entt::registry registry;
 };
 

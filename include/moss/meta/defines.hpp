@@ -58,14 +58,4 @@ extern int infoStep3;
     WARN(message, __VA_ARGS__); \
 }
 
-
-/////////////////////
-//// -- Types -- ////
-/////////////////////
-namespace types {
-
-using AttachmentRegistry = std::unordered_map<std::string, std::function<void(entt::registry&, entt::entity&, const json&)>>;
-
-} // types
-
 } // moss

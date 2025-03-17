@@ -17,6 +17,7 @@ registering entity attatchments.
 #include <memory.h>
 
 
+
 ////////////////////////////////////
 //// -- Custom serialization -- ////
 ////////////////////////////////////
@@ -135,23 +136,5 @@ inline void from_json(const json& j, glm::u32vec4& vec) {
         auto& r = registry.emplace<std::unique_ptr<moss::Renderer>>(entity, std::make_unique<renderer>()); \
         r->init() \
     }
-
-
-/////////////////////////////////////////////////
-//// -- Standard components serialization -- ////
-/////////////////////////////////////////////////
-namespace moss {
-
-namespace components {
-    SERIALIZE_COMPONENT(components::Transform, position, scale, rotation);
-    SERIALIZE_COMPONENT(components::RigidBody, velocity, acceleration, mass, elasticity);
-    SERIALIZE_COMPONENT(components::RectCollider, transform);
-    SERIALIZE_COMPONENT(components::Material, albedo, thickness, fill);
-}
-
-namespace renderables {
-    SERIALIZE_COMPONENT(renderables::Circle::Shape, radius);
-    SERIALIZE_COMPONENT(renderables::Circle, transform, material, shape);
-}
 
 } // moss

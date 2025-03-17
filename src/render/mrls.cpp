@@ -44,9 +44,9 @@ void MRLS::tick(sys::TickCrate crate) {
         auto& renderable = crate.registry.get<std::unique_ptr<Renderable>>(e);
 
         if (auto* circle = dynamic_cast<rcmp::Circle*>(renderable.get())) {
-            drawRenderable(circle);
+            drawRenderable(e, circle); // Create crate for drawRenderable in mrls namespace
         } else {
-            drawRenderable(renderable);
+            drawRenderable(e, renderable);
         }
     }
 
@@ -59,11 +59,17 @@ bool MRLS::shouldClose() { return WindowShouldClose(); }
 ////////////////////
 //// -- DRAW -- ////
 ////////////////////
-void MRLS::drawRenderable(const std::unique_ptr<Renderable>& renderable) {
-    WARN("Renderable render call with input \"{}-renderable\" not defined", boost::typeindex::type_id<decltype(*renderable)>().pretty_name());
+void MRLS::drawRenderable(const entt::entity& entity, const std::unique_ptr<Renderable>& renderable) {
+    WARN(
+        "Renderable render call with input \"{}-renderable\" from entity \"{}\" not defined",
+        boost::typeindex::type_id<decltype(*renderable)>().pretty_name(),
+        boost::typeindex::type_id<decltype(entity)>().pretty_name()
+    );
 }
 
-void MRLS::drawRenderable(const rcmp::Circle* renderable) {
+void MRLS::drawRenderable(const entt::entity& entity, const rcmp::Circle* renderable) {
+    auto transform = 
+
     DrawCircleV(
         utils::raylib::glmToRaylib<glm::f32vec2, Vector2>(renderable->transform.position),
         renderable->shape.radius,

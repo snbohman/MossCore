@@ -31,8 +31,8 @@ public:
     bool shouldClose() override;
 
 private:
-    void drawRenderable(const std::unique_ptr<Renderable>& renderable);
-    void drawRenderable(const rcmp::Circle* renderable);
+    void drawRenderable(const entt::entity& e, const std::unique_ptr<Renderable>& renderable);
+    void drawRenderable(const entt::entity& e, const rcmp::Circle* renderable);
 
     json windowConfig;
 };
