@@ -40,5 +40,19 @@ public:
     virtual void exit(Contex& contex) { }
 };
 
+class Package {
+public:
+    virtual ~Package() = default;
+
+    virtual void init() { }
+    void build(Contex& contex);
+    void tick(Contex& contex);
+    void exit(Contex& contex);
+
+protected:
+    template<typename T> void attachComponent();
+    template<typename ...T> void attachSystem();
+};
+
 } // moss
 

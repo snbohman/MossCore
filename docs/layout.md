@@ -85,8 +85,22 @@ every part of the application. The contex can therefore also be aquired by a
 simple get statement inside the system, but a parameter is provided for ease of
 use.
 
-A system can hold different 
-
 ### [2.3] Packages
 A package is essentially a system, for calling systems and initializing
-components. The base class very closely resembles the System class.
+components. The base class very closely resembles the System class. As per the
+usage, one might notice that the only (non-trivial) functions marked as virtual
+are the init functions and its overloads. A package child can only initialize
+which systems and which components to use, through the build function and the
+public attachmentFunctions, attaching to the system and component vector.
+
+'''cpp
+class Package {
+public:
+    virtual ~Package() = default;
+
+    virtual void init() { }
+    void build(Contex& contex);
+    void tick(Contex& contex);
+    void exit(Contex& contex);
+};
+'''
