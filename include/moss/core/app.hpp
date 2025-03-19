@@ -18,6 +18,9 @@ driven approach.
 
 namespace moss {
 
+template<typename... T>
+struct View { };
+
 class App {
 public:
     inline App() { };
@@ -25,11 +28,10 @@ public:
 
     App& create(glm::u32 count = 1);
 
-    template<typename T>
-    App& attachComponent(std::initializer_list<entt::entity> entities = { });
-    App& attachSystem(const System& system, std::initializer_list<entt::entity> entities = { });
-    template<typename T> App& attachPackage(std::function<const Contex&> package);
-    template<typename T> App& attachContainer(std::function<const Contex&> package);
+    template<typename ...T> App& attachComponent();
+    template<typename ...T> App& attachSystem();
+    template<typename ...T> App& attachPackage();
+    template<typename ...T> App& view();
 
     static App& init();
     App& build();

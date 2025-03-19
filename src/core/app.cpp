@@ -8,6 +8,7 @@ Implements core/app.hpp.
 #include <moss/meta/libs.hpp>
 #include <moss/core/app.hpp>
 #include <moss/core/ecs.hpp>
+#include <type_traits>
 
 
 using moss::App;
@@ -16,21 +17,36 @@ using moss::App;
 //// -- ECS -- ////
 ///////////////////
 App& App::create(glm::u32 count) {
-    for (int i = 0; i < count; i++) {
+    for (glm::u32 i = 0; i < count; i++) {
         m_latest.push_back(m_registry.create());
-    } return *this;
+    }
+
+    return *this;
 }
 
-template<typename T>
-App& App::attachComponent(std::initializer_list<entt::entity> entities) {
-    for (entt::entity entity : entities.size() == 0 ? m_latest : entities) {
-        m_registry.emplace<T>(entity);
-    } return *this;
+template<typename ...T>
+App& App::attachComponent() {
+    static_assert(
+        std::is_base_of<T..., Component>::value,
+        "[MOSS] All type inputs must be a base class of Component"
+    );
+
+    for (entt::entity entity : m_latest) {
+        m_registry.emplace<T...>(entity);
+    }
+
+    return *this;
 }
 
-App& App::attachSystem(const System& func, std::initializer_list<entt::entity> entities) {
-    for (entt::entity entity : entities.size() == 0 ? m_latest : entities) {
-        m_registry.emplace<System>(entity).init();
+template<typename ...T>
+App& App::attachSystem() {
+    static_assert(
+        std::is_base_of<T..., System>::value,
+        "[MOSS] All type inputs must be a base class of System"
+    );
+
+    for (entt::entity entity : m_latest) {
+        m_registry.emplace<T...>(entity).init();
     }
 
     return *this;
@@ -61,7 +77,7 @@ App& App::build() {
 App& App::run() {
     while (m_quit) {
         for (entt::entity system : m_registry.view<System>()) {
-            m_registry.get<System>(system).build();
+            m_registry.get<System>(system).tick();
         }
     }
 
@@ -70,6 +86,6 @@ App& App::run() {
 
 void App::exit() {
     for (entt::entity system : m_registry.view<System>()) {
-        m_registry.get<System>(system).build();
+        m_registry.get<System>(system).exit();
     }
 }
