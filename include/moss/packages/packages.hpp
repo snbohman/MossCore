@@ -2,13 +2,10 @@
 packages/package.hpp
 
 The default packages for the moss 
-engine. Includes rendering, scenes
+engine. Includes opengl rendering,
+vulkan rendering ...
 ...
 
 */
 
-struct Container { };
 
-struct C1 : Container {
-    p o
-};

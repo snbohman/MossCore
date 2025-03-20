@@ -44,7 +44,7 @@ class Package {
 public:
     virtual ~Package() = default;
 
-    virtual void init() { }
+    virtual void init(Contex& contex) { }
     void build(Contex& contex);
     void tick(Contex& contex);
     void exit(Contex& contex);

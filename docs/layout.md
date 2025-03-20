@@ -4,7 +4,7 @@ the core principles.
 
 
 ## [1] Core
-### [1.2] App
+### [1.1] App
 The main application. The main hub. It's nothing fancy. An ecs registry, some
 helper functions. It's all relativly simple. I have gone for a fancy sounding
 *fluent Interface* pattern. Its all really preference, but I quite enjoy the
@@ -80,7 +80,7 @@ public:
 The virtual destructor can be ignored, as it is common boilerplate for
 inheritance classes. As you can see, four different functions are provided for
 overriding, but only three with an overload of parameterer Contex. The contex
-is, as described in 1.3 below, a singleton application/class, unanimous for
+is, as described in 1.3, a singleton application/class, unanimous for
 every part of the application. The contex can therefore also be aquired by a
 simple get statement inside the system, but a parameter is provided for ease of
 use.
@@ -104,3 +104,12 @@ public:
     void exit(Contex& contex);
 };
 '''
+
+Through the contex entities are created. A specialized registry for a package
+is **NEVER** provided. Instead of then creating entities in the main file,
+instead a package is attached and therefore creating entities through the
+init contex and build contex. The init function will create entities and the
+build will set components values.
+
+**TODO: create contex subtype that will only grant ceation of entities. In
+general always create contex with certain permissions.**
