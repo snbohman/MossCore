@@ -1,12 +1,7 @@
 /*
 core/app.hpp - parentless
 
-Core application. An functional
-driven approach.
-
-- set values
-- systems
-- packages
+Core application.
 
 */
 

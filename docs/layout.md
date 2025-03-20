@@ -35,6 +35,17 @@ system by a simple singleton get function. As the contex definition is quite
 heavy, I wont be providing it, but feel free to look at '''core/contex.hpp'''
 for the full definition.
 
+### [1.3] Values
+Values are set by systems in the **build** stage/function. In the build stage
+every entity is ensure to exist. In values I of course mean the values of 
+component/component initialization. So two possibilities exist:
+    - Setting it in a build system.
+    - Loading from json file.
+The loading json file function will be in the future provided by a config
+or by the contex, im not really sure. It will be used by the ui engine,
+to easily load components from json files that the ui writes to. A load
+json extension will also be added to load from json entity files.
+
 
 ## [2] Ecs
 ### [2.1] Component
