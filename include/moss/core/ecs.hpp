@@ -1,4 +1,4 @@
-/*
+/*ecs
 ecs/ecs.hpp
 
 Defines the standard/base component,
@@ -35,23 +35,20 @@ public:
     virtual void tick() { }
     virtual void exit() { }
 
-    virtual void build(Contex& contex) { }
-    virtual void tick(Contex& contex) { }
-    virtual void exit(Contex& contex) { }
+    virtual void init(Contex<contex::ATTACH>& contex) { }
+    virtual void build(Contex<contex::CREATE>& contex) { }
+    virtual void tick(Contex<contex::CREATE>& contex) { }
+    virtual void exit(Contex<contex::READ>& contex) { }
 };
 
 class Package {
 public:
     virtual ~Package() = default;
 
-    virtual void init(Contex& contex) { }
-    void build(Contex& contex);
-    void tick(Contex& contex);
-    void exit(Contex& contex);
-
-protected:
-    template<typename T> void attachComponent();
-    template<typename ...T> void attachSystem();
+    virtual void init(Contex<contex::ATTACH>& contex) { }
+    void build(Contex<contex::CREATE> & contex);
+    void tick(Contex<contex::CREATE> & contex);
+    void exit(Contex<contex::READ> & contex);
 };
 
 } // moss

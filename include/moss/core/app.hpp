@@ -13,20 +13,17 @@ Core application.
 
 namespace moss {
 
-template<typename... T>
-struct View { };
-
 class App {
 public:
     inline App() { };
     inline ~App() { };
 
     App& create(glm::u32 count = 1);
-
-    template<typename ...T> App& attachComponent();
-    template<typename ...T> App& attachSystem();
-    template<typename ...T> App& attachPackage();
-    template<typename ...T> App& view();
+    template<typename... T> App& attachComponent();
+    template<typename... T> App& attachSystem();
+    template<typename... T> App& attachPackage();
+    App& query();
+    App& view();
 
     static App& init();
     App& build();

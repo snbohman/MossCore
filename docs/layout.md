@@ -1,6 +1,6 @@
 # Layout
 A doc describing the different components/archtectures of the game engine, and
-the core principles.
+the core principles. Design one could call.
 
 
 ## [1] Core
@@ -121,6 +121,3 @@ is **NEVER** provided. Instead of then creating entities in the main file,
 instead a package is attached and therefore creating entities through the
 init contex and build contex. The init function will create entities and the
 build will set components values.
-
-**TODO: create contex subtype that will only grant ceation of entities. In
-general always create contex with certain permissions.**
