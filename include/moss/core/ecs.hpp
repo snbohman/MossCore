@@ -45,10 +45,11 @@ class Package {
 public:
     virtual ~Package() = default;
 
+    virtual void init() { }
     virtual void init(Contex<contex::ATTACH>& contex) { }
-    void build(Contex<contex::CREATE> & contex);
-    void tick(Contex<contex::CREATE> & contex);
-    void exit(Contex<contex::READ> & contex);
+    void build(Contex<contex::CREATE>& contex);
+    void tick(Contex<contex::CREATE>& contex);
+    void exit(Contex<contex::READ>& contex);
 };
 
 } // moss

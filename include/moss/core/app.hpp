@@ -19,11 +19,11 @@ public:
     inline ~App() { };
 
     App& create(glm::u32 count = 1);
-    template<typename... T> App& attachComponent();
+    template<typename... T> App& attachComponent(); // add view obj
     template<typename... T> App& attachSystem();
     template<typename... T> App& attachPackage();
-    App& query();
-    App& view();
+    App& query(); // will create latest query
+    App& view(); // will create latest view to be attached to etc
 
     static App& init();
     App& build();

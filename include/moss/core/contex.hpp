@@ -11,9 +11,8 @@ namespace moss{
 
 namespace contex {
 enum Permissions {
-    CREATE,
-    ATTACH,
-    READ
+    READ,
+    WRITE
 };
 } // contex
 
