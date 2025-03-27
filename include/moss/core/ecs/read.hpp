@@ -88,20 +88,17 @@ struct Query<With<W...>, View<Vw...>> {
         auto eView = view.apply(registry);
         ERROR_IFF(std::distance(eView.begin(), eView.end()) > 2, "View size is greater than one. Consider using an Atlas instead");
 
-        return std::move(registry.get<W...>(eView.begin()));
+        return std::move(registry.get<W...>(*eView.begin()));
     }
 };
-
-struct pos {};
-struct hel {};
 
 inline void test() {
     entt::registry reg;
 
-    View<Include<pos>, Exclude<hel>> view;
+    View<Include<int>, Exclude<float>> view;
     auto v = view.apply(reg);
 
-    Query<With<int, float>, View< Include<pos>, Exclude<hel> >> q;
+    Query<With<int, float>, View< Include<int>, Exclude<float> >> q;
     auto atlas = q.atlas(reg);
     auto pool = q.pool(reg);
 }
