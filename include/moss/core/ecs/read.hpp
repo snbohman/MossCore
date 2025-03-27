@@ -35,7 +35,7 @@ struct With : public Types<T...> { };
 ////////////////////
 //// -- View -- ////
 ////////////////////
-template<typename Inc, typename Ex>
+template<typename IncludeT, typename ExcludeT = std::tuple<>>
 struct View;
 
 template<typename... Inc, typename... Ex>
@@ -43,8 +43,11 @@ struct View<Include<Inc...>, Exclude<Ex...>> {
     static_assert(sizeof...(Inc) > 0, "Include<> is required to have at least one component");
 
     [[nodiscard]] auto apply(entt::registry& registry) {
-        auto v = registry.view<Inc...>(entt::exclude<Ex...>);
-        return std::move(v);
+        if constexpr (sizeof...(Ex) == 0) {
+            return std::move(registry.view<Inc...>());
+        } else {
+            return std::move(registry.view<Inc...>(entt::exclude<Ex...>));
+        }
     }
 };
 
@@ -62,8 +65,7 @@ using Atlas = std::vector<Pool<C...>>;
 /////////////////////
 //// -- Query -- ////
 /////////////////////
-template<typename W, typename Vw>
-struct Query;
+template<typename W, typename Vw> struct Query;
 
 template<typename... W, typename... Vw>
 struct Query<With<W...>, View<Vw...>> {
@@ -91,16 +93,5 @@ struct Query<With<W...>, View<Vw...>> {
         return std::move(registry.get<W...>(*eView.begin()));
     }
 };
-
-inline void test() {
-    entt::registry reg;
-
-    View<Include<int>, Exclude<float>> view;
-    auto v = view.apply(reg);
-
-    Query<With<int, float>, View< Include<int>, Exclude<float> >> q;
-    auto atlas = q.atlas(reg);
-    auto pool = q.pool(reg);
-}
 
 } // moss
