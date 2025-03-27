@@ -58,4 +58,12 @@ extern int infoStep3;
     WARN(message, __VA_ARGS__); \
 }
 
+#define ERROR_IFF(statement, message) if (statement) { \
+    ERRORF(message); \
+}
+
+#define WARN_IFF(statement, message) if (statement) { \
+    WARNF(message); \
+}
+
 } // moss

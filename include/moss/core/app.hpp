@@ -9,7 +9,6 @@ Core application.
 
 
 #include <moss/meta/libs.hpp>
-#include <moss/core/ecs.hpp>
 
 namespace moss {
 

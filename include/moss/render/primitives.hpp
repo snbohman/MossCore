@@ -1,6 +1,6 @@
 #pragma once
 
-#include <moss/ecs/ecs.hpp>
+#include <moss/core/ecs.hpp>
 
 
 namespace moss {
