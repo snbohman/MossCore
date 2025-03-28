@@ -1,7 +1,5 @@
 project "mossCore"
     kind "StaticLib"
-    language "C++"
-    cppdialect "C++17"
     targetdir "bin/%{cfg.buildcfg}"
     objdir "build/%{cfg.buildcfg}"
 
@@ -9,13 +7,9 @@ project "mossCore"
 
     includedirs {
         "include",
-        "external/catch2",
         "external/entt/single_include",
         "external/spdlog/include"
     }
-
-    filter "system:linux"
-        links { "pthread" } -- Maybe remove
 
     filter "configurations:debug"
         defines { "DEBUG" }
@@ -24,3 +18,13 @@ project "mossCore"
     filter "configurations:release"
         defines { "NDEBUG" }
         optimize "On"
+
+project "mossCoreTests"
+    kind "ConsoleApp"
+
+    targetdir "bin/%{cfg.buildcfg}"
+    objdir "build/%{cfg.buildcfg}"
+
+    files { "tests/**.cpp" }
+    includedirs { "external/doctest", "include" }
+    links { "mossCore" }

@@ -8,9 +8,9 @@ Main hub for including moss as user.
 #pragma once
 
 
-#include <moss/ecs/ecs.hpp>
 #include <moss/core/app.hpp>
-#include <moss/core/scene.hpp>
-#include <moss/render/render.hpp>
+#include <moss/core/contex.hpp>
+#include <moss/core/ecs.hpp>
+#include <moss/packages/packages.hpp>
 #include <moss/meta/defines.hpp>
 #include <moss/utils/utils.hpp>

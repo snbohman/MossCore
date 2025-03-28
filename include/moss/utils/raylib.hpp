@@ -10,9 +10,9 @@ namespace with glm->raylib functions.
 
 #include <moss/meta/defines.hpp>
 #include <moss/meta/libs.hpp>
-#include <moss/meta/raylibLibs.hpp>
 #include <boost/type_index.hpp>
 
+/*
 
 namespace moss::utils::raylib {
 
@@ -59,3 +59,5 @@ inline std::vector<U> glmsToRaylib(const std::vector<T>& vec) {
 }
 
 } // utils::raylib
+
+*/

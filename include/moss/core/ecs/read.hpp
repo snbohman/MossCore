@@ -40,7 +40,7 @@ struct View;
 
 template<typename... Inc, typename... Ex>
 struct View<Include<Inc...>, Exclude<Ex...>> {
-    static_assert(sizeof...(Inc) > 0, "Include<> is required to have at least one component");
+    static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
     [[nodiscard]] auto apply(entt::registry& registry) {
         if constexpr (sizeof...(Ex) == 0) {
@@ -58,6 +58,13 @@ struct View<Include<Inc...>, Exclude<Ex...>> {
 template<typename... C>
 using Pool = std::tuple<C...>;
 
+/*
+Lists of Pools. Might seem useless, when entities are unkown,
+but if I were to reimplement this as suggested, it would
+essentially just become a view. It has many usecases, but not
+the one above, and it will never have. The user will just have
+to manipulate their views better.
+*/
 template<typename... C>
 using Atlas = std::vector<Pool<C...>>;
 
@@ -65,15 +72,16 @@ using Atlas = std::vector<Pool<C...>>;
 /////////////////////
 //// -- Query -- ////
 /////////////////////
-template<typename W, typename Vw> struct Query;
+template<typename...>
+struct Query;
 
-template<typename... W, typename... Vw>
-struct Query<With<W...>, View<Vw...>> {
+template<typename... W, typename... VwI, typename... VwE>
+struct Query<With<W...>, View< Include<VwI...>, Exclude<VwE...> >> {
     static_assert(sizeof...(W) > 0, "With<> is required to have at least one component");
 
     [[nodiscard]] Atlas<W...> atlas(entt::registry& registry) {
         Atlas<W...> atlas;
-        View<Vw...> view;
+        View<Include<VwI...>, Exclude<VwE...>> view;
         auto eView = view.apply(registry);
 
         atlas.reserve(std::distance(eView.begin(), eView.end()));
@@ -86,9 +94,9 @@ struct Query<With<W...>, View<Vw...>> {
     }
 
     [[nodiscard]] Pool<W...> pool(entt::registry& registry) {
-        View<Vw...> view;
+        View<Include<VwI...>, Exclude<VwE...>> view;
         auto eView = view.apply(registry);
-        ERROR_IFF(std::distance(eView.begin(), eView.end()) > 2, "View size is greater than one. Consider using an Atlas instead");
+        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) > 2, "View size is greater than one. Consider using an Atlas instead");
 
         return std::move(registry.get<W...>(*eView.begin()));
     }
