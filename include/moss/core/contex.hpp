@@ -14,6 +14,47 @@ auto entities = contex.read<View<
     Exclude<...>
 >();
 
+                -- Or --
+auto components = contex
+    .read()
+        .view<Include<...>, Exclude<...>>()
+        .query<With<...>>()
+        .pool()
+    .save();
+
+
+                -- Or --
+View<...> v;
+auto enttView = contex.apply(v);
+
+Query<...> q;
+auto [...] = contex.pool(q);
+
+The last one is best because of compile time and
+resuable query objects, only requiring read permissions
+when applying a view or getting atlas or pool from query.
+
+Should components also be like this? So every component
+is compile-time defined. So like
+
+Component<vec3, vec2, float>
+instead of
+Component {
+    vec3 bla;
+    vec2 blo;
+    float ble;
+}
+
+Advantages:
+    - Compile time
+    - Fits with read standard
+
+Disadvantages:
+    - No names (or harder at least)
+
+Conclusion:
+    NO. https://chatgpt.com/share/67e6d9ab-0f28-8000-8295-8bfb7263c812
+
 */
 
 #pragma once
