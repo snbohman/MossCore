@@ -75,31 +75,32 @@ using Atlas = std::vector<Pool<C...>>;
 template<typename...>
 struct Query;
 
-template<typename... W, typename... VwI, typename... VwE>
-struct Query<With<W...>, View< Include<VwI...>, Exclude<VwE...> >> {
-    static_assert(sizeof...(W) > 0, "With<> is required to have at least one component");
+template<typename... Wth, typename... VwInc, typename... VwEx>
+struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+    static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    [[nodiscard]] Atlas<W...> atlas(entt::registry& registry) {
-        Atlas<W...> atlas;
-        View<Include<VwI...>, Exclude<VwE...>> view;
-        auto eView = view.apply(registry);
+    [[nodiscard]] Atlas<Wth...> atlas(entt::registry& registry) {
+        Atlas<Wth...> atlas;
+        auto eView = m_view.apply(registry);
 
         atlas.reserve(std::distance(eView.begin(), eView.end()));
 
         for (const auto& entity : eView) {
-            atlas.push_back(std::move(registry.get<W...>(entity)));
+            atlas.push_back(std::move(registry.get<Wth...>(entity)));
         }
 
         return std::move(atlas);
     }
 
-    [[nodiscard]] Pool<W...> pool(entt::registry& registry) {
-        View<Include<VwI...>, Exclude<VwE...>> view;
-        auto eView = view.apply(registry);
-        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) > 2, "View size is greater than one. Consider using an Atlas instead");
+    [[nodiscard]] Pool<Wth...> pool(entt::registry& registry) {
+        auto eView = m_view.apply(registry);
+        M_WARN_IFF(std::distance(eView.begin(), eView.end()) > 1, "View size is greater than one. Consider using an Atlas instead");
 
-        return std::move(registry.get<W...>(*eView.begin()));
+        return std::move(registry.get<Wth...>(*eView.begin()));
     }
+
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
 };
 
 } // moss

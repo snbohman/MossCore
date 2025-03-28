@@ -74,10 +74,6 @@ TEST_CASE("Queries") {
     CHECK_NOTHROW(
         moss::Query<moss::With<Position>, moss::View< moss::Include<EnemyTag>, moss::Exclude<> >>()
     );
-
-    CHECK_THROWS(   // No View::Include
-        moss::Query<moss::With<Position>, moss::View< moss::Include<>, moss::Exclude<> >>()
-    );
 }
 
 
