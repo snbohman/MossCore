@@ -6,8 +6,16 @@ project "mossCore"
     objdir "build/%{cfg.buildcfg}"
 
     files { "src/**.cpp" }
-    includedirs { "include", "entt" }
-    links { "raylib", "fmt" }
+
+    includedirs {
+        "include",
+        "external/catch2",
+        "external/entt/single_include",
+        "external/spdlog/include"
+    }
+
+    filter "system:linux"
+        links { "pthread" } -- Maybe remove
 
     filter "configurations:debug"
         defines { "DEBUG" }

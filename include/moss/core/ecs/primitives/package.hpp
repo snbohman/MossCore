@@ -2,6 +2,7 @@
 
 #include <moss/core/contex.hpp>
 
+namespace moss {
 
 class Package {
 public:
@@ -12,3 +13,5 @@ public:
     void tick(Contex<contex::READ>& contex);
     void exit(Contex<contex::WRITE>& contex);
 };
+
+}

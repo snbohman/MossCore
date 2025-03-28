@@ -1,10 +1,18 @@
 /*
 core/ecs/contex.hpp
 
-Pool query = contex
-    .read<View<With<proj::PlayerTag>, Out<cmp::Transform>>()
-    .read<Query<cmp::Transform, cmp::Physics>>()
-    .write<Pool>();
+auto components = contex.read<Query<
+    With<...>,
+    View<
+        Inlcude<...>,
+        Exclude<...>
+    >
+>();
+
+auto entities = contex.read<View<
+    Include<...>,
+    Exclude<...>
+>();
 
 */
 
@@ -18,6 +26,16 @@ namespace moss{
 
 namespace contex {
 
+/*
+WRITE: The lowest of permissions. You can only write to your
+own entity, and not read from others.
+
+
+READ: Persmissions granted to tick system funcs. All functions 
+accessable. You can *read* other entities with views and queries,
+and you can write to your own entity or to others.
+
+*/
 enum Permissions {
     READ,
     WRITE
@@ -28,25 +46,20 @@ enum Permissions {
 template<contex::Permissions P>
 class Contex {
 public:
-    Contex(App* app) { m_app = app; }
-    ~Contex() { }
+    explicit Contex(App* app) : m_app(app) {}
 
-    template<contex::Permissions T> static Contex<T>& init(const App& app) {
-        static Contex<T> instance(app);
-        return instance;
-    }
+    Contex(const Contex&) = delete;
+    Contex& operator=(const Contex&) = delete;
+    Contex(Contex&&) = delete;
+    Contex& operator=(Contex&&) = delete;
 
-    Contex& create(glm::u32 count = 1) { m_app->create(count); }
-    template<typename... T> Contex& attachComponent() { m_app->attachComponent<T...>(); }
-    template<typename... T> Contex& attachSystem() { m_app->attachSystem<T...>(); };
-    template<typename... T> Contex& attachPackage() { m_app->attachSystem<T...>(); };
+    Contex& create(glm::u32 count = 1) { m_app->create(count); return *this; }
+    template<typename... T> Contex& attachComponent() { m_app->attachComponent<T...>(); return *this; }
+    template<typename... T> Contex& attachSystem() { m_app->attachSystem<T...>(); return *this; };
+    template<typename... T> Contex& attachPackage() { /* attache package */ return *this; };
 
 private:
     App* m_app;
-
-    View m_latestView;
-    Query m_latestQuery;
-    Pool m_latestPool;
 };
 
 } // namsespace moss
