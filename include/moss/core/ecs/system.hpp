@@ -1,7 +1,7 @@
 #pragma once
 
 #include <moss/core/contex.hpp>
-#include <moss/core/ecs/read.hpp>
+#include <moss/core/commands/primitives.hpp>
 
 namespace moss {
 

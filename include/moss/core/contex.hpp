@@ -1,117 +1,76 @@
 /*
-core/ecs/contex.hpp
+core/app.hpp - parentless
 
-auto components = contex.read<Query<
-    With<...>,
-    View<
-        Inlcude<...>,
-        Exclude<...>
-    >
->();
+Core application.
 
-auto entities = contex.read<View<
-    Include<...>,
-    Exclude<...>
->();
-
-                -- Or --
-auto components = contex
-    .read()
-        .view<Include<...>, Exclude<...>>()
-        .query<With<...>>()
-        .pool()
-    .save();
-
-
-                -- Or --
-View<...> v;
-auto enttView = contex.apply(v);
-
-Query<...> q;
-auto [...] = contex.pool(q);
-
-The last one is best because of compile time and
-resuable query objects, only requiring read permissions
-when applying a view or getting atlas or pool from query.
-
-Should components also be like this? So every component
-is compile-time defined. So like
-
-Component<vec3, vec2, float>
-instead of
-Component {
-    vec3 bla;
-    vec2 blo;
-    float ble;
-}
-
-Advantages:
-    - Compile time
-    - Fits with read standard
-
-Disadvantages:
-    - No names (or harder at least)
-
-Conclusion:
-    NO. https://chatgpt.com/share/67e6d9ab-0f28-8000-8295-8bfb7263c812
+Maybe move the attach stuff too
+it's own logic, like contex plans.
 
 */
 
 #pragma once
 
+
 #include <moss/meta/libs.hpp>
+#include <moss/core/ecs/component.hpp>
+#include <moss/core/commands/primitives.hpp>
 
-
-namespace moss{
+namespace moss {
 
 namespace contex {
 
-/*
-WRITE: The lowest of permissions. You can only write to your
-own entity, and not read from others.
-
-
-READ: Persmissions granted to tick system funcs. All functions 
-accessable. You can *read* other entities with views and queries,
-and you can write to your own entity or to others.
-
-*/
 enum Permissions {
-    READ,
-    WRITE
+    READ = 1 << 0,
+    WRITE = 1 << 1,
 };
 
-} // contex
+}
 
 template<contex::Permissions P>
 class Contex {
 public:
-    /*explicit Contex(App* app) : m_app(app) {*/
-    /*    app->loadRegistry(m_registry);*/
-    /*}*/
-    /**/
-    /*Contex(const Contex&) = delete;*/
-    /*Contex& operator=(const Contex&) = delete;*/
-    /*Contex(Contex&&) = delete;*/
-    /*Contex& operator=(Contex&&) = delete;*/
+    explicit Contex() { }
 
-    /*
-    Doesnt require any user permissions. It is only used
-    by core. Users *can* use this, but it defeats the safetyS
-    purpose of the engine. See it like unsafe rust.
-    */
-    /*Contex& loadRegistry(entt::registry* registry) { registry = m_registry; return *this; }*/
-    /**/
-    /*Contex& quit() { m_app->quit(); return *this; };*/
-    /**/
-    /*Contex& create(glm::u32 count = 1) { m_app->create(count); return *this; }*/
-    /*template<typename... T> Contex& attachComponent() { m_app->attachComponent<T...>(); return *this; }*/
-    /*template<typename... T> Contex& attachSystem() { m_app->attachSystem<T...>(); return *this; };*/
-    /*template<typename... T> Contex& attachPackage() { /* attache package  return *this; };*/
+    Contex& create(glm::u32 count = 1);
+
+    Contex(const Contex&) = delete;
+    Contex& operator=(const Contex&) = delete;
+    Contex(Contex&&) = delete;
+    Contex& operator=(Contex&&) = delete;
+
+    Contex& quit();
+
+    static Contex& init();
+    Contex& build();
+    Contex& run();
+    void exit();
+
+    ///////////////////////////////
+    //// -- ECS (Templated) -- ////
+    ///////////////////////////////
+    template<typename... T>
+    Contex& attachComponent() {
+        for (entt::entity entity : m_latest) {
+            m_registry.emplace<T...>(entity);
+        }
+
+        return *this;
+    }
+
+    template<typename... T>
+    Contex& attachSystem() {
+        for (entt::entity entity : m_latest) {
+            m_registry.emplace<T...>(entity).init();
+        }
+
+        return *this;
+    }
 
 private:
-    entt::registry* m_registry;
-    /*App* m_app;*/
+    entt::registry m_registry;
+    DynamicView m_latest;
+
+    bool m_quit = false;
 };
 
-} // namsespace moss
+} // moss

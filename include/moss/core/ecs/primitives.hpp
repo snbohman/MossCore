@@ -9,6 +9,12 @@ package and system classes/structs.
 #pragma once
 
 
-#include <moss/core/ecs/primitives/component.hpp>
-#include <moss/core/ecs/primitives/package.hpp>
-#include <moss/core/ecs/primitives/system.hpp>
+#include <moss/meta/libs.hpp>
+#include <moss/core/contex.hpp>
+
+
+namespace moss {
+
+
+
+} // moss
