@@ -10,6 +10,7 @@ long types, such as AttatchmentRegistry.
 #pragma once
 
 #include <spdlog/spdlog.h>
+#include <fmt/format.h>
 #include <entt/entt.hpp>
 
 namespace moss {

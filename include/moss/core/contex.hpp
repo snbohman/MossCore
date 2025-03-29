@@ -59,8 +59,7 @@ Conclusion:
 
 #pragma once
 
-#include <moss/core/app.hpp>
-#include <moss/core/ecs/read.hpp>
+#include <moss/meta/libs.hpp>
 
 
 namespace moss{
@@ -87,20 +86,32 @@ enum Permissions {
 template<contex::Permissions P>
 class Contex {
 public:
-    explicit Contex(App* app) : m_app(app) {}
+    /*explicit Contex(App* app) : m_app(app) {*/
+    /*    app->loadRegistry(m_registry);*/
+    /*}*/
+    /**/
+    /*Contex(const Contex&) = delete;*/
+    /*Contex& operator=(const Contex&) = delete;*/
+    /*Contex(Contex&&) = delete;*/
+    /*Contex& operator=(Contex&&) = delete;*/
 
-    Contex(const Contex&) = delete;
-    Contex& operator=(const Contex&) = delete;
-    Contex(Contex&&) = delete;
-    Contex& operator=(Contex&&) = delete;
-
-    Contex& create(glm::u32 count = 1) { m_app->create(count); return *this; }
-    template<typename... T> Contex& attachComponent() { m_app->attachComponent<T...>(); return *this; }
-    template<typename... T> Contex& attachSystem() { m_app->attachSystem<T...>(); return *this; };
-    template<typename... T> Contex& attachPackage() { /* attache package */ return *this; };
+    /*
+    Doesnt require any user permissions. It is only used
+    by core. Users *can* use this, but it defeats the safetyS
+    purpose of the engine. See it like unsafe rust.
+    */
+    /*Contex& loadRegistry(entt::registry* registry) { registry = m_registry; return *this; }*/
+    /**/
+    /*Contex& quit() { m_app->quit(); return *this; };*/
+    /**/
+    /*Contex& create(glm::u32 count = 1) { m_app->create(count); return *this; }*/
+    /*template<typename... T> Contex& attachComponent() { m_app->attachComponent<T...>(); return *this; }*/
+    /*template<typename... T> Contex& attachSystem() { m_app->attachSystem<T...>(); return *this; };*/
+    /*template<typename... T> Contex& attachPackage() { /* attache package  return *this; };*/
 
 private:
-    App* m_app;
+    entt::registry* m_registry;
+    /*App* m_app;*/
 };
 
 } // namsespace moss
