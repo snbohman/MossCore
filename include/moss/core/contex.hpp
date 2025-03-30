@@ -33,6 +33,7 @@ public:
     Contex& operator=(const Contex&) = delete;
     Contex(Contex&&) = delete;
     Contex& operator=(Contex&&) = delete;
+    Contex(entt::registry& reg) : registry(reg) { }
 
     entt::registry& registry;
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <moss/commands/write.hpp>
+#include <moss/commands/primitives.hpp>
 
 namespace moss {
 
@@ -22,26 +22,34 @@ public:
     Fluent(Fluent&&) = delete;
     Fluent& operator=(Fluent&&) = delete;
 
-    static Fluent& init() { static Fluent<P> fluent; return fluent; }
+    static Fluent& init();
+    static Fluent& get();
 
-    Fluent& create(int count = 1) {
-        for (int i = 0; i < count; i++) {
-            m_view.push_back(m_registry->create());
-        }
-    }
+    ///////////////////
+    //// -- ECS -- ////
+    ///////////////////
+    void create(glm::u32 count = 1);
+    void view();
+    void query();
 
-    template<typename... T>
-    Fluent& attach() {
-        for (entt::entity entity : m_view) {
-            m_registry->emplace<T...>(entity);
-        }
+    ///////////////////////////////
+    //// -- ECS (Templated) -- ////
+    ///////////////////////////////
+    template<typename Components, typename View> Fluent& attach();
 
+    template<typename C..., typename Vw...> Fluent<View<Vw...>> & attach() {
+        for (entt::entity entity : m_view) m_registry->emplace<T...>(entity);
         return *this;
     }
 
+    template<typename... T> Fluent& attach() {
+        for (entt::entity entity : m_view) m_registry->emplace<T...>(entity);
+        return *this;
+    }
+ 
 private:
     entt::registry* m_registry;
-    DynamicView m_view;
+    commands::write::DynamicView m_view;
 };
 
 }

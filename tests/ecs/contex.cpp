@@ -37,8 +37,8 @@ TEST_CASE("Basic App") {
     app.load(contex);
 
     cmd/command::Create<10> c;
-    cmd::DynamicView v1 = c.build(contex).view();
-    cmd::DynamicView v2 = c.build(contex).view();
+    cmd::DynamicView v1 = c.apply(contex.command()).view();
+    cmd::DynamicView v2 = c.apply(contex.command()).view();
 
     /*
     alternatively:
@@ -64,7 +64,7 @@ TEST_CASE("Basic App") {
             .attach<Movement, Position, PlayerTag>()
         .create(10)
             .attach<Position, EnemyTag>()
-        .attach<WorldWide>(fluent.view<Position>());
+        .attach<WorldWide, View<Position>>();
 
     app.build(fluent);
     app.run();
