@@ -1,3 +1,47 @@
+/*
+core/writer.hpp
+
+Utelizing the flunet design pattern, inspired
+by rs-bevvy. It is dependent on "runtime". In
+it's ways to increase ease of use, it has to
+drop the compile time safety seen in contex
+and it's structs. This operates on vectors,
+heap and non compile time friendly queries.
+The list goes on and on...
+
+It might seem useless, but in less intensive
+tasks, where safety isn't an issue, this is
+very handy for ease of use.
+
+It utelizes mutex locks for ensuring that
+only one instance can exist, so no 
+permissions will be remapped by the user.
+
+It does not do read operations, hence the 
+name. Only creation of entities and
+attachments of those.
+
+------------------------
+<<<< -- Examples -- >>>>
+------------------------
+
+Fluent::init()
+    .create()
+        .attach<PlayerTag, PlayerMovement, Position>()
+    .create(10)
+        .attach<EnemyTag, EnemyMovement, Position>();
+
+<<<< ---- >>>>
+
+Fluent::get();     // THROWS RUNTIME ERROR
+Fluent::init();
+Fluent::get();     // RUNS
+Fluent::destroy();
+Fluent::get();     // THROWS RUNTIME ERROR
+
+*/
+
+
 #pragma once
 
 #include <moss/meta/libs.hpp>
@@ -10,8 +54,8 @@ namespace moss {
 
 namespace fluent {
 
+/* Only write permissions available for fluent */
 enum Permissions {
-    READ = 1 << 0,
     WRITE = 1 << 1,
 };
 
@@ -73,12 +117,12 @@ public:
         s_instance.reset();
     }
 
-    ///////////////////
-    //// -- ECS -- ////
-    ///////////////////
+    ////////////////////////
+    //// -- User ECS -- ////
+    ////////////////////////
     Fluent<P>& quit() { }
 
-    Fluent& create(glm::u32 count = 1) {
+    Fluent<P>& create(glm::u32 count = 1) {
         m_view.clear();
         m_view.reserve(count);
 
@@ -89,21 +133,18 @@ public:
         return *this;
     }
 
-    Fluent& view() { }
-    Fluent& query() { }
-
-    ///////////////////////////////
-    //// -- ECS (Templated) -- ////
-    ///////////////////////////////
     template<typename... T> Fluent& attach() {
-        for (entt::entity entity : m_view) m_registry->emplace<T...>(entity);
+        for (entt::entity entity : m_view)
+            m_registry->emplace<T...>(entity);
+
         return *this;
     }
+
  
 private:
     Fluent() = default;
 
-    static inline std::unique_ptr<Fluent<P>> s_instance = nullptr;
+    static inline std::unique_ptr<Fluent> s_instance = nullptr;
     static inline std::mutex s_mutex;
 
     entt::registry* m_registry;
