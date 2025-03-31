@@ -35,6 +35,7 @@ template<typename... Inc, typename... Ex>
 struct View<Include<Inc...>, Exclude<Ex...>> {
     static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
+    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; }
     void apply(entt::registry& registry) { m_registry = &registry; }
     void clean() { m_registry = nullptr; }
 

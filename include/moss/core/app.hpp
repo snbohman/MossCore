@@ -14,13 +14,12 @@ public:
     void clean();
     void exit();
 
-    void load(Contex<contex::READ>& contex);
-    void load(Contex<contex::WRITE>& contex);
-    void load(Fluent<fluent::READ>& contex);
-    void load(Fluent<fluent::WRITE>& contex);
+    void apply(Contex<contex::READ>& contex);
+    void apply(Fluent<fluent::WRITE>& fluent);
 
 private:
     entt::registry m_registry;
+    bool m_quit = false;
 };
 
 }

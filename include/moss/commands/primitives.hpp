@@ -16,22 +16,19 @@ definitions.
 
 namespace moss {
 
-/////////////////////
-//// -- Types -- ////
-/////////////////////
-template <typename... T>
-struct Types {
-    using types = std::tuple<T...>;
-};
+////////////////////
+//// -- Base -- ////
+////////////////////
+using Entity = entt::entity;
 
-template<typename... T>
-struct Include : public Types<T...> { };
+template<typename... Ts>
+struct Include { };
 
-template<typename... T>
-struct Exclude : public Types<T...> { };
+template<typename... Ts>
+struct Exclude { };
 
-template<typename... T>
-struct With : public Types<T...> { };
+template<typename... Ts>
+struct With { };
 
 
 /////////////////////
@@ -39,9 +36,9 @@ struct With : public Types<T...> { };
 /////////////////////
 namespace  commands::write {
 
-using DynamicView = std::vector<entt::entity>;
+using DynamicView = std::vector<Entity>;
 
-template<typename With>
+template<typename... T>
 struct DynamicQuery;
 
 }

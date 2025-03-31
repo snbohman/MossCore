@@ -33,9 +33,9 @@ public:
     Contex& operator=(const Contex&) = delete;
     Contex(Contex&&) = delete;
     Contex& operator=(Contex&&) = delete;
-    Contex(entt::registry& reg) : registry(reg) { }
+    Contex() { }
 
-    entt::registry& registry;
+    entt::registry* registry;
 };
 
 } // moss

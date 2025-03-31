@@ -117,6 +117,13 @@ public:
         s_instance.reset();
     }
 
+    ////////////////////
+    //// -- Core -- ////
+    ////////////////////
+    void apply(entt::registry* registry) {
+        m_registry = registry;
+    }
+
     ////////////////////////
     //// -- User ECS -- ////
     ////////////////////////
@@ -135,7 +142,7 @@ public:
 
     template<typename... T> Fluent& attach() {
         for (entt::entity entity : m_view)
-            m_registry->emplace<T...>(entity);
+            m_registry->emplace<T...>(entity).init();
 
         return *this;
     }

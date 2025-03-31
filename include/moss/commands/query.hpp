@@ -19,6 +19,8 @@ template<typename... Wth, typename... VwInc, typename... VwEx>
 struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
+    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; m_view.apply(contex.registry); }
+    void apply(Contex<contex::WRITE>& contex) { m_registry = &contex.registry; m_view.apply(contex.registry); }
     void apply(entt::registry& registry) { m_registry = &registry; m_view.apply(registry); }
     void clean() { m_registry = nullptr; }
 
@@ -59,6 +61,8 @@ template<typename... Wth>
 struct DynamicQuery<With<Wth...>> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
+    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; }
+    void apply(Contex<contex::WRITE>& contex) { m_registry = &contex.registry; }
     void apply(entt::registry& registry) { m_registry = &registry; }
     void clean() { m_registry = nullptr; }
 
@@ -85,7 +89,6 @@ struct DynamicQuery<With<Wth...>> {
 
 private:
     entt::registry* m_registry;
-
 };
 
 }
