@@ -25,7 +25,7 @@ attachments of those.
 <<<< -- Examples -- >>>>
 ------------------------
 
-Fluent::init()
+Contex::init()
     .create()
         .attach<PlayerTag, PlayerMovement, Position>()
     .create(10)
@@ -33,11 +33,11 @@ Fluent::init()
 
 <<<< ---- >>>>
 
-Fluent::get();     // THROWS RUNTIME ERROR
-Fluent::init();
-Fluent::get();     // RUNS
-Fluent::destroy();
-Fluent::get();     // THROWS RUNTIME ERROR
+Contex::get();     // THROWS RUNTIME ERROR
+Contex::init();
+Contex::get();     // RUNS
+Contex::destroy();
+Contex::get();     // THROWS RUNTIME ERROR
 
 */
 
@@ -52,9 +52,9 @@ Fluent::get();     // THROWS RUNTIME ERROR
 
 namespace moss {
 
-namespace fluent {
+namespace contex {
 
-/* Only write permissions *currently* available for fluent */
+/* Only write permissions *currently* available for contex */
 enum Permissions {
     READ = 1 << 0,
     WRITE = 1 << 1,
@@ -64,7 +64,7 @@ class MutexBase {
 protected:
     MutexBase() {
         std::lock_guard<std::mutex> lock(s_mutex);
-        M_ERROR_IFF(s_initialized, "Fluent instance already exists");
+        M_ERROR_IFF(s_initialized, "Contex instance already exists");
         s_initialized = true;
     }
 
@@ -79,23 +79,23 @@ protected:
 
 }
 
-template<fluent::Permissions P>
-class Fluent : public fluent::MutexBase {
+template<contex::Permissions P>
+class Contex : public contex::MutexBase {
 public:
     /////////////////////////
     //// -- Operators -- ////
     /////////////////////////
-    Fluent(const Fluent&) = delete;
-    Fluent& operator=(const Fluent&) = delete;
-    Fluent(Fluent&&) = delete;
-    Fluent& operator=(Fluent&&) = delete;
+    Contex(const Contex&) = delete;
+    Contex& operator=(const Contex&) = delete;
+    Contex(Contex&&) = delete;
+    Contex& operator=(Contex&&) = delete;
 
     ////////////////////////////
     //// -- Public Locks -- ////
     ////////////////////////////
-    static Fluent<P>& get() {
+    static Contex<P>& get() {
         std::lock_guard<std::mutex> lock(s_mutex);
-        M_ERROR_IFF(!s_instance, "Fluent instance not initialized");
+        M_ERROR_IFF(!s_instance, "Contex instance not initialized");
 
         return *s_instance;
     }
@@ -103,9 +103,9 @@ public:
     ////////////////////////
     //// -- User ECS -- ////
     ////////////////////////
-    Fluent<P>& quit() { }
+    Contex<P>& quit() { }
 
-    Fluent<P>& entity(glm::u32 count = 1) {
+    Contex<P>& entity(glm::u32 count = 1) {
         m_view.clear();
         m_view.reserve(count);
 
@@ -116,7 +116,7 @@ public:
         return *this;
     }
 
-    template<typename... T> Fluent& component() {
+    template<typename... T> Contex& component() {
         for (entt::entity entity : m_view)
             m_registry->emplace<T...>(entity).init();
 
@@ -125,8 +125,8 @@ public:
 
  
 private:
-    Fluent() = default;
-    ~Fluent() = default;
+    Contex() = default;
+    ~Contex() = default;
 
     ///////////////////////
     //// -- Friends -- ////
@@ -144,11 +144,11 @@ private:
         registry = m_registry;
     }
 
-    static Fluent<P>& init() {
+    static Contex<P>& init() {
         std::lock_guard<std::mutex> lock(s_mutex);
-        M_ERROR_IFF(s_instance, "Fluent instance already initialized");
+        M_ERROR_IFF(s_instance, "Contex instance already initialized");
 
-        s_instance = std::make_unique<Fluent<P>>();
+        s_instance = std::make_unique<Contex<P>>();
         return *s_instance;
     }
 
@@ -160,7 +160,7 @@ private:
     /////////////////////
     //// -- Mutex -- ////
     /////////////////////
-    static inline std::unique_ptr<Fluent> s_instance = nullptr;
+    static inline std::unique_ptr<Contex> s_instance = nullptr;
     static inline std::mutex s_mutex;
 
     ///////////////////
