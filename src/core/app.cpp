@@ -5,16 +5,12 @@
 
 using namespace moss;
 
-////////////////////
-//// -- User -- ////
-////////////////////
-void App::apply(Contex<contex::READ>& contex) {
-    contex.registry = &m_registry;
-}
-
-void App::apply(Fluent<fluent::WRITE>& fluent) {
-    fluent.apply(&m_registry);
-}
+//////////////////////
+//// -- Contex -- ////
+//////////////////////
+void App::attach(Contex<contex::WRITE>& contex) { contex.registry = &m_registry; }
+void App::attach(Contex<contex::READ>& contex) { contex.registry = &m_registry; }
+void App::attach(Fluent<fluent::WRITE>& fluent) { fluent.apply(&m_registry); }
 
 
 ////////////////////////
@@ -53,7 +49,7 @@ void moss::App::run() {
         }
     }
 
-    Fluent<fluent::WRITE>::destroy();
+    Fluent<fluent::READ>::destroy();
 }
 
 void moss::App::clean() { }

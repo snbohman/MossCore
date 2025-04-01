@@ -54,8 +54,9 @@ namespace moss {
 
 namespace fluent {
 
-/* Only write permissions available for fluent */
+/* Only write permissions *currently* available for fluent */
 enum Permissions {
+    READ = 1 << 0,
     WRITE = 1 << 1,
 };
 
@@ -89,17 +90,9 @@ public:
     Fluent(Fluent&&) = delete;
     Fluent& operator=(Fluent&&) = delete;
 
-    ///////////////////////////
-    //// -- Mutex Locks -- ////
-    ///////////////////////////
-    static Fluent<P>& init() {
-        std::lock_guard<std::mutex> lock(s_mutex);
-        M_ERROR_IFF(s_instance, "Fluent instance already initialized");
-
-        s_instance = std::make_unique<Fluent<P>>();
-        return *s_instance;
-    }
-
+    ////////////////////////////
+    //// -- Public Locks -- ////
+    ////////////////////////////
     static Fluent<P>& get() {
         std::lock_guard<std::mutex> lock(s_mutex);
         M_ERROR_IFF(!s_instance, "Fluent instance not initialized");
@@ -107,29 +100,12 @@ public:
         return *s_instance;
     }
 
-    static bool exists() {
-        std::lock_guard<std::mutex> lock(s_mutex);
-        return s_instance != nullptr;
-    }
-
-    static void destroy() {
-        std::lock_guard<std::mutex> lock(s_mutex);
-        s_instance.reset();
-    }
-
-    ////////////////////
-    //// -- Core -- ////
-    ////////////////////
-    void apply(entt::registry* registry) {
-        m_registry = registry;
-    }
-
     ////////////////////////
     //// -- User ECS -- ////
     ////////////////////////
     Fluent<P>& quit() { }
 
-    Fluent<P>& create(glm::u32 count = 1) {
+    Fluent<P>& entity(glm::u32 count = 1) {
         m_view.clear();
         m_view.reserve(count);
 
@@ -140,7 +116,7 @@ public:
         return *this;
     }
 
-    template<typename... T> Fluent& attach() {
+    template<typename... T> Fluent& component() {
         for (entt::entity entity : m_view)
             m_registry->emplace<T...>(entity).init();
 
@@ -150,12 +126,49 @@ public:
  
 private:
     Fluent() = default;
+    ~Fluent() = default;
 
+    ///////////////////////
+    //// -- Friends -- ////
+    ///////////////////////
+    friend class App;
+
+    //////////////////////////////////
+    //// -- Friended functions -- ////
+    //////////////////////////////////
+    void inject(entt::registry* registry) {
+        m_registry = registry;
+    }
+
+    void apply(entt::registry*& registry) {
+        registry = m_registry;
+    }
+
+    static Fluent<P>& init() {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        M_ERROR_IFF(s_instance, "Fluent instance already initialized");
+
+        s_instance = std::make_unique<Fluent<P>>();
+        return *s_instance;
+    }
+
+    static void destroy() {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        s_instance.reset();
+    }
+
+    /////////////////////
+    //// -- Mutex -- ////
+    /////////////////////
     static inline std::unique_ptr<Fluent> s_instance = nullptr;
     static inline std::mutex s_mutex;
 
+    ///////////////////
+    //// -- ECS -- ////
+    ///////////////////
     entt::registry* m_registry;
     commands::write::DynamicView m_view;
+
 };
 
 }

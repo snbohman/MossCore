@@ -13,7 +13,7 @@ it's own logic, like contex plans.
 
 #include <moss/meta/libs.hpp>
 #include <moss/ecs/component.hpp>
-#include <moss/commands/primitives.hpp>
+#include <moss/commands/commands.hpp>
 
 namespace moss {
 
@@ -35,7 +35,18 @@ public:
     Contex& operator=(Contex&&) = delete;
     Contex() { }
 
-    entt::registry* registry;
+private:
+    friend class App;
+
+    void inject(entt::registry* registry) {
+        m_registry = registry;
+    }
+
+    void apply(entt::registry*& registry) {
+        registry = m_registry;
+    }
+
+    entt::registry* m_registry;
 };
 
 } // moss
