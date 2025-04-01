@@ -34,7 +34,7 @@ struct With { };
 /////////////////////
 //// -- Write -- ////
 /////////////////////
-namespace  commands::write {
+namespace commands::write {
 
 using DynamicView = std::vector<Entity>;
 

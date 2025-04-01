@@ -13,14 +13,6 @@ public:
     virtual void build() { }
     virtual void tick() { }
     virtual void exit() { }
-
-    virtual void build(Contex<contex::WRITE>& contex) { }
-    virtual void tick(Contex<contex::READ>& contex) { }
-    virtual void exit(Contex<contex::WRITE>& contex) { }
-
-    virtual void build(Contex<contex::WRITE>& contex, Entity entity) { }
-    virtual void tick(Contex<contex::READ>& contex, Entity entity) { }
-    virtual void exit(Contex<contex::WRITE>& contex, Entity entity) { }
 };
 
 }

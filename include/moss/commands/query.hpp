@@ -9,7 +9,6 @@ a pool.
 
 #include <moss/meta/defines.hpp>
 #include <moss/core/contex.hpp>
-#include <moss/core/fluent.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss::commands {
@@ -19,9 +18,7 @@ template<typename... Wth, typename... VwInc, typename... VwEx>
 struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; m_view.apply(contex.registry); }
-    void apply(Contex<contex::WRITE>& contex) { m_registry = &contex.registry; m_view.apply(contex.registry); }
-    void apply(entt::registry& registry) { m_registry = &registry; m_view.apply(registry); }
+    void apply() { m_registry = &contex.registry; m_view.apply(contex.registry); }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = true) {
@@ -62,8 +59,6 @@ struct DynamicQuery<With<Wth...>> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
     void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; }
-    void apply(Contex<contex::WRITE>& contex) { m_registry = &contex.registry; }
-    void apply(entt::registry& registry) { m_registry = &registry; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] read::Atlas<Wth...> atlas(const DynamicView& view, bool doClean = true) {

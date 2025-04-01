@@ -1,5 +1,5 @@
 /*
-core/writer.hpp
+core/contex.hpp
 
 Utelizing the flunet design pattern, inspired
 by rs-bevvy. It is dependent on "runtime". In
@@ -54,12 +54,13 @@ namespace moss {
 
 namespace contex {
 
-/* Only write permissions *currently* available for contex */
 enum Permissions {
     READ = 1 << 0,
-    WRITE = 1 << 1,
+    WRITE = 1 << 1
 };
 
+
+/* Initializing once logic */
 class MutexBase {
 protected:
     MutexBase() {
@@ -91,7 +92,7 @@ public:
     Contex& operator=(Contex&&) = delete;
 
     ////////////////////////////
-    //// -- Public Locks -- ////
+    //// -- Public locks -- ////
     ////////////////////////////
     static Contex<P>& get() {
         std::lock_guard<std::mutex> lock(s_mutex);
@@ -100,9 +101,9 @@ public:
         return *s_instance;
     }
 
-    ////////////////////////
-    //// -- User ECS -- ////
-    ////////////////////////
+    //////////////////////////
+    //// -- Public ECS -- ////
+    //////////////////////////
     Contex<P>& quit() { }
 
     Contex<P>& entity(glm::u32 count = 1) {
@@ -128,14 +129,29 @@ private:
     Contex() = default;
     ~Contex() = default;
 
-    ///////////////////////
-    //// -- Friends -- ////
-    ///////////////////////
+
+    //////////////////////
+    //// -- Friend -- ////
+    //////////////////////
+    /*
+    The primitive file that we include is
+    only basic definitions. So it basically
+    counts as a forward declaration. See 
+    deepseek chat for more info (somewhere):
+        **https://chat.deepseek.com/a/chat/s/fbb442af-23f3-42a1-9f12-047245b41586**
+    */
     friend class App;
 
-    //////////////////////////////////
-    //// -- Friended functions -- ////
-    //////////////////////////////////
+    template<typename Wth, typename Vw>
+    friend class commands::read::Query;
+
+    template<typename Inc, typename Ex>
+    friend class commands::read::View;
+
+    //////////////////////////////
+    //// -- Restricted ECS -- ////
+    //////////////////////////////
+    template<typename T>
     void inject(entt::registry* registry) {
         m_registry = registry;
     }
@@ -144,6 +160,9 @@ private:
         registry = m_registry;
     }
 
+    ////////////////////////////////
+    //// -- Restricted Locks -- ////
+    ////////////////////////////////
     static Contex<P>& init() {
         std::lock_guard<std::mutex> lock(s_mutex);
         M_ERROR_IFF(s_instance, "Contex instance already initialized");
@@ -167,7 +186,7 @@ private:
     //// -- ECS -- ////
     ///////////////////
     entt::registry* m_registry;
-    commands::write::DynamicView m_view;
+    /*commands::write::DynamicView m_view;*/
 
 };
 

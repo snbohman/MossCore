@@ -14,6 +14,8 @@ Defines log macros, utelizing spdlog.
 
 namespace moss {
 
+#define M_SA(condition, message) static_assert(condition, message)
+
 #define M_ERROR(message, ...)   spdlog::error(message, __VA_ARGS__)
 #define M_WARN(message, ...)    spdlog::warn(message, __VA_ARGS__)
 #define M_INFO(message, ...)    spdlog::info(message, __VA_ARGS__)

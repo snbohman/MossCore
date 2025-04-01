@@ -25,18 +25,16 @@ automatically leads to some handy safety measures.
 #pragma once
 
 #include <moss/core/contex.hpp>
-#include <moss/core/fluent.hpp>
 #include <moss/commands/primitives.hpp>
 
 
 namespace moss::commands::read {
 
 template<typename... Inc, typename... Ex>
-struct View<Include<Inc...>, Exclude<Ex...>> {
+class View<Include<Inc...>, Exclude<Ex...>> {
     static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
-    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; }
-    void apply(entt::registry& registry) { m_registry = &registry; }
+    void apply() { Contex<contex::READ>::get().apply(m_registry); } 
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] auto view(bool doClean = true) {
