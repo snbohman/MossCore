@@ -1,7 +1,17 @@
+/*
+ * @file    core/app.hpp
+ * @brief   Main application class.
+ *
+ * The `App` class orchestrates the application lifecycle, managing the ECS
+ * registry and systems.  It provides methods for initialization, building,
+ * running, cleaning up, and exiting the application.  The `App` class
+ * itself does not directly modify the ECS registry or systems.  Instead,
+ * it relies on the `Contex` class to perform these operations.
+ */
+
 #pragma once
 
 #include <moss/core/contex.hpp>
-#include <moss/core/fluent.hpp>
 #include <moss/ecs/ecs.hpp>
 
 
@@ -15,17 +25,11 @@ public:
     void clean();
     void exit();
 
-    /*
-    Attaching a registry from a contex or fluent.
-    */
-    void attach(Contex<contex::WRITE>& contex);
-    void attach(Contex<contex::READ>& contex);
-    void attach(Fluent<fluent::WRITE>& fluent);
+    template<typename Ctx>
+    void attach();
 
 private:
     entt::registry m_registry;
-    std::vector<System> m_systems;
-    bool m_quit = false;
 };
 
 }

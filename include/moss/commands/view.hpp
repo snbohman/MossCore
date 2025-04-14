@@ -1,24 +1,20 @@
 /*
-command/view.hpp
-
-The view. Essentially just holding entities.
-Applied in different ways, runtime or compile
-time, but yet in the end just holds entities.
-
-DynamicView:
-The runtime view. No template needed. Is just a
-heap allocated vector holding entities. No safety
-implemented. Is defined in primitives for
-preventing including problems and because it is
-just a plain output type.
-
-View:
-The compile-time view. Of course, the registry is
-runtime, but that is only shown in the apply
-functions. Everything else is compile-time, which
-automatically leads to some handy safety measures.
-
-
+ * @file    command/view.hpp
+ * @brief   Defines entity views for ECS operations, both runtime and compile-time.
+ *
+ * An entity view is a container holding a selection of entities based on
+ * specified criteria.  This file defines two types of views:
+ *
+ * 1.  **DynamicView:** A runtime view implemented as a heap-allocated
+ *     `std::vector<entt::entity>`.  It offers flexibility without compile-time
+ *     safety.  Defined in `primitives.hpp` to avoid circular dependencies
+ *     and because it's a simple output type.
+ *
+ * 2.  **View:** A compile-time view that leverages templates to enforce
+ *     inclusion and exclusion criteria at compile time. While the ECS registry
+ *     access is inherently runtime, the view's structure and filtering logic
+ *     are determined at compile time, providing increased safety and
+ *     performance through static analysis.
 */
 
 
@@ -27,14 +23,16 @@ automatically leads to some handy safety measures.
 #include <moss/core/contex.hpp>
 #include <moss/commands/primitives.hpp>
 
-
-namespace moss::commands::read {
+namespace moss::commands {
 
 template<typename... Inc, typename... Ex>
 class View<Include<Inc...>, Exclude<Ex...>> {
+    View() { }
+    ~View() { }
+
     static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
-    void apply() { Contex<contex::READ>::get().apply(m_registry); } 
+    void apply() { Contex<contex::WRITE>::get().apply(m_registry); } 
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] auto view(bool doClean = true) {

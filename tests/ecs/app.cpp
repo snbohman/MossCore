@@ -1,10 +1,10 @@
 #include <doctest.h>
 #include <moss/meta/defines.hpp>
 #include <moss/core/app.hpp>
-#include <moss/core/fluent.hpp>
 #include <moss/ecs/system.hpp>
 #include <moss/commands/primitives.hpp>
 #include <moss/commands/query.hpp>
+
 
 using namespace moss;
 
@@ -12,17 +12,17 @@ struct Position : Component { float x; float y; };
 struct PlayerTag : Component { };
 struct EnemyTag : Component { };
 
-class Movement : public System {
-    void build(Contex<contex::WRITE>& contex, Entity entity) override {
-        commands::write::DynamicQuery<With<Position>> q;
+class PlayerMovement : public System {
+    void build(Key<key::WRITE>& contex) override {
+        commands::DynamicQuery<With<Position>> q;
         q.apply(contex);
 
         auto [pos] = q.pool({ entity });
         pos.x = 10; pos.y = 0;
     }
 
-    void tick(Contex<contex::READ>& contex, Entity entity) override {
-        commands::write::DynamicQuery<With<Position>> q;
+    void tick(Key<key::WRITE>& contex) override {
+        commands::DynamicQuery<With<Position>> q;
         q.apply(contex);
         auto [pos] = q.pool({ entity });
 
@@ -30,14 +30,22 @@ class Movement : public System {
     }
 };
 
+class Player : public Contex {
+    void init(Mirror& mirror) override {
+        mirror.create().attach<Position, PlayerTag>().connect<PlayerMovement>();
+    }
+};
+
+class World : public Contex {
+    void init(Mirror& mirror) override {
+        mirror
+            .plug<Player>();
+    }
+};
 
 TEST_CASE("Basic App") {
-    App app;
-    app.init();
-
-    Contex<contex::READ> contex;
-    app.loadContex(contex);
-
-    Create<10> c;
-    DynamicView v = c.apply(contex);
+    App::init()
+        .mount<World>()
+            .build()
+            .run();
 }

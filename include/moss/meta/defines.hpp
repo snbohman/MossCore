@@ -8,9 +8,8 @@ Defines log macros, utelizing spdlog.
 
 #pragma once
 
-#include <spdlog/spdlog.h>
+#include <moss/meta/libs.hpp>
 #include <fmt/format.h>
-#include <entt/entt.hpp>
 
 namespace moss {
 

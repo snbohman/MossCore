@@ -1,54 +1,55 @@
 /*
-core/contex.hpp
-
-Utelizing the flunet design pattern, inspired
-by rs-bevvy. It is dependent on "runtime". In
-it's ways to increase ease of use, it has to
-drop the compile time safety seen in contex
-and it's structs. This operates on vectors,
-heap and non compile time friendly queries.
-The list goes on and on...
-
-It might seem useless, but in less intensive
-tasks, where safety isn't an issue, this is
-very handy for ease of use.
-
-It utelizes mutex locks for ensuring that
-only one instance can exist, so no 
-permissions will be remapped by the user.
-
-It does not do read operations, hence the 
-name. Only creation of entities and
-attachments of those.
-
-------------------------
-<<<< -- Examples -- >>>>
-------------------------
-
-Contex::init()
-    .create()
-        .attach<PlayerTag, PlayerMovement, Position>()
-    .create(10)
-        .attach<EnemyTag, EnemyMovement, Position>();
-
-<<<< ---- >>>>
-
-Contex::get();     // THROWS RUNTIME ERROR
-Contex::init();
-Contex::get();     // RUNS
-Contex::destroy();
-Contex::get();     // THROWS RUNTIME ERROR
-
-*/
+ * @file    core/contex.hpp
+ * @brief   Singleton Contex class providing access to the ECS registry.
+ *
+ * This class provides a singleton instance for managing ECS operations, ensuring
+ * that only one instance exists to prevent conflicting permission mappings.
+ * It offers two primary modes of interaction:
+ *
+ * 1.  **Compile-Time Safe Commands:** Utilized through command structures, offering
+ *     compile-time safety and type checking for ECS operations.
+ *
+ * 2.  **Runtime Fluent API:** A fluent design pattern (inspired by rs-bevvy) for
+ *     runtime entity creation and component attachment. This approach, while
+ *     sacrificing some compile-time safety, provides a more flexible and
+ *     ergonomic API for rapid prototyping or less critical tasks.  The runtime
+ *     API is accessed through the `Contex` functions (e.g., `create()`, `attach()`).
+ *
+ * The class uses mutex locks to guarantee thread-safe access and prevent
+ * multiple instances from being created.
+ *
+ * **Usage Examples (Runtime API):**
+ *
+ * ```cpp
+ * Contex::init()
+ *     .create()
+ *         .attach<PlayerTag, PlayerMovement, Position>()
+ *     .create(10)
+ *         .attach<EnemyTag, EnemyMovement, Position>();
+ * ```
+ *
+ * **Singleton Management:**
+ *
+ * ```cpp
+ * Contex::get();     // THROWS RUNTIME ERROR if not initialized
+ * Contex::init();
+ * Contex::get();     // Runs successfully
+ * Contex::destroy();
+ * Contex::get();     // THROWS RUNTIME ERROR after destruction
+ * ```
+ */
 
 
 #pragma once
 
 #include <moss/meta/libs.hpp>
 #include <moss/meta/defines.hpp>
+#include <moss/core/ecs.hpp>
 #include <moss/commands/primitives.hpp>
+
 #include <memory>
 #include <mutex>
+
 
 namespace moss {
 
@@ -59,8 +60,6 @@ enum Permissions {
     WRITE = 1 << 1
 };
 
-
-/* Initializing once logic */
 class MutexBase {
 protected:
     MutexBase() {
@@ -86,10 +85,10 @@ public:
     /////////////////////////
     //// -- Operators -- ////
     /////////////////////////
-    Contex(const Contex&) = delete;
-    Contex& operator=(const Contex&) = delete;
-    Contex(Contex&&) = delete;
-    Contex& operator=(Contex&&) = delete;
+    Contex<P>(const Contex<P>&) = delete;
+    Contex<P>& operator=(const Contex<P>&) = delete;
+    Contex<P>(Contex<P>&&) = delete;
+    Contex<P>& operator=(Contex<P>&&) = delete;
 
     ////////////////////////////
     //// -- Public locks -- ////
@@ -106,7 +105,7 @@ public:
     //////////////////////////
     Contex<P>& quit() { }
 
-    Contex<P>& entity(glm::u32 count = 1) {
+    Contex<P>& create(glm::u32 count = 1) {
         m_view.clear();
         m_view.reserve(count);
 
@@ -117,9 +116,22 @@ public:
         return *this;
     }
 
-    template<typename... T> Contex& component() {
+    /* For components to latest m_view. */
+    template<typename... T> Contex<P>& attach() {
+        static_assert(
+            std::is_base_of<Component, T...>::value,
+            "Expected all of T to inherit moss::Component"
+        );
+
         for (entt::entity entity : m_view)
             m_registry->emplace<T...>(entity).init();
+
+        return *this;
+    }
+
+    /* For attaching systems to global system entity. */
+    template<typename... T> Contex& connect() {
+        m_registry->emplace<e_system>().init();
 
         return *this;
     }
@@ -143,15 +155,17 @@ private:
     friend class App;
 
     template<typename Wth, typename Vw>
-    friend class commands::read::Query;
+    friend class commands::Query;
+
+    template<typename Wth>
+    friend class commands::DynamicQuery;
 
     template<typename Inc, typename Ex>
-    friend class commands::read::View;
+    friend class commands::View;
 
     //////////////////////////////
     //// -- Restricted ECS -- ////
     //////////////////////////////
-    template<typename T>
     void inject(entt::registry* registry) {
         m_registry = registry;
     }
@@ -186,8 +200,9 @@ private:
     //// -- ECS -- ////
     ///////////////////
     entt::registry* m_registry;
-    /*commands::write::DynamicView m_view;*/
+    entt::entity& e_system;
 
+    DynamicView m_view;
 };
 
 }

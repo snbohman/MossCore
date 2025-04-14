@@ -1,10 +1,23 @@
 /*
-commands/query.hpp
-
-The query. Queries for components from a view.
-It stores it's components into an atlas or
-a pool.
-
+ * @file    commands/query.hpp
+ * @brief   Defines query structures for retrieving components from entity views.
+ *
+ * Queries allow efficient retrieval of component data from a specified entity
+ * view. The retrieved components are stored either in an `Atlas` or a `Pool`.
+ *
+ * -   `Atlas`:  A container suitable for storing components from multiple
+ *     entities within the view.
+ * -   `Pool`:   A container intended for storing components from a single
+ *     entity. Using a `Pool` with a view containing multiple entities may
+ *     lead to undefined behavior, and a warning is issued.
+ *
+ * Two types of queries are provided:
+ *
+ * 1.  **Query:** A compile-time query that operates on a statically defined
+ *     `View`.  This offers compile-time safety and optimization opportunities.
+ *
+ * 2.  **DynamicQuery:** A runtime query that operates on a `DynamicView`.
+ *     This provides flexibility but sacrifices compile-time safety.
 */
 
 #include <moss/meta/defines.hpp>
@@ -12,14 +25,13 @@ a pool.
 #include <moss/commands/primitives.hpp>
 
 namespace moss::commands {
-namespace read {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
 struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    void apply() { m_registry = &contex.registry; m_view.apply(contex.registry); }
-    void clean() { m_registry = nullptr; }
+    void apply() { Contex<contex::READ>::get().apply(m_registry); m_view.apply(); }
+    void clean() { m_registry = nullptr; m_view.clean(); }
 
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = true) {
         auto eView = m_view.view(doClean);
@@ -50,19 +62,16 @@ private:
     entt::registry* m_registry;
 };
 
-}
-
-namespace write {
 
 template<typename... Wth>
 struct DynamicQuery<With<Wth...>> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    void apply(Contex<contex::READ>& contex) { m_registry = &contex.registry; }
+    void apply(Contex<contex::READ>& contex) { contex.}
     void clean() { m_registry = nullptr; }
 
-    [[nodiscard]] read::Atlas<Wth...> atlas(const DynamicView& view, bool doClean = true) {
-        read::Atlas<Wth...> atlas;
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = true) {
+        Atlas<Wth...> atlas;
         atlas.reserve(std::distance(view.begin(), view.end()));
         for (const auto& entity : view) {
             atlas.push_back(std::move(m_registry->get<Wth...>(entity)));
@@ -72,7 +81,7 @@ struct DynamicQuery<With<Wth...>> {
         return std::move(atlas);
     }
 
-    [[nodiscard]] read::Pool<Wth...> pool(const DynamicView& view, bool doClean = true) {
+    [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = true) {
         M_WARN_IFF(std::distance(view.begin(), view.end()) > 1,
             "View size is greater than one. Consider using \
             an Atlas instead. Undefined behaviour is \
@@ -85,7 +94,5 @@ struct DynamicQuery<With<Wth...>> {
 private:
     entt::registry* m_registry;
 };
-
-}
 
 }

@@ -31,31 +31,27 @@ template<typename... Ts>
 struct With { };
 
 
-/////////////////////
-//// -- Write -- ////
-/////////////////////
-namespace commands::write {
-
+///////////////////////
+//// -- Outputs -- ////
+///////////////////////
 using DynamicView = std::vector<Entity>;
-
-template<typename... T>
-struct DynamicQuery;
-
-}
-
-////////////////////
-//// -- Read -- ////
-////////////////////
-namespace commands::read {
-
-template<typename Include, typename Exclude>
-struct View;
 
 template<typename... C>
 using Pool = std::tuple<C...>;
 
 template<typename... C>
 using Atlas = std::vector<Pool<C...>&>;
+
+////////////////////
+//// -- Read -- ////
+////////////////////
+namespace commands {
+
+template<typename... T>
+struct DynamicQuery;
+
+template<typename Include, typename Exclude>
+struct View;
 
 template<typename With, typename View>
 struct Query;
