@@ -95,7 +95,7 @@ public:
             "Expected all of T to inherit moss::System"
         );
 
-        m_contex.m_view.push_back(T()...);
+        m_contex.m_systems.push_back(std::make_unique<T>()...);
         return *this;
     }
 

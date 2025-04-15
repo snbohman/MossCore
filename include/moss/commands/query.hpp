@@ -21,7 +21,7 @@
 */
 
 #include <moss/meta/defines.hpp>
-#include <moss/core/contex.hpp>
+#include <moss/core/context.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss::commands {

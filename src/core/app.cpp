@@ -11,22 +11,11 @@
 
 using namespace moss;
 
-/**
- * @brief Access the global singleton instance of the App.
- * 
- * Ensures there's only one App instance alive. Used to begin
- * the fluent lifecycle chain.
- */
 App& App::instance() {
     static App app;
     return app;
 }
 
-/**
- * @brief Initializes engine internals (e.g., logger setup).
- * 
- * This should be called before mounting any contexts.
- */
 App& App::init() {
     auto sink = std::make_shared<logger::MainSink<std::mutex>>();
     auto logger = std::make_shared<spdlog::logger>("MainLogger", sink);
@@ -35,44 +24,36 @@ App& App::init() {
     return *this;
 }
 
-/**
- * @brief Builds all mounted contexts.
- * 
- * Each context's `build()` function is called. This is the stage
- * where systems are attached and internal data structures are set.
- */
 App& App::build() {
+    Key<key::WRITE> key;
+    key.m_registry = &m_registry;
+
     for (auto& ctx : m_contexts) {
-        ctx->build();
+        ctx->build(key);
     }
 
     return *this;
 }
 
-/**
- * @brief Enters the main loop, ticking all contexts until quit.
- * 
- * Continuously runs `tick()` on each mounted context.
- * Will only stop when `m_quit` is set to true (not exposed yet).
- */
 App& App::run() {
+    Key<key::READ> key;
+    key.m_registry = &m_registry;
+
     while (!m_quit) {
         for (auto& ctx : m_contexts) {
-            ctx->tick();
+            ctx->tick(key);
         }
     }
 
     return *this;
 }
 
-/**
- * @brief Cleans up all mounted contexts.
- * 
- * Runs `exit()` on each context to gracefully shut them down.
- */
 App& App::exit() {
+    Key<key::WRITE> key;
+    key.m_registry = &m_registry;
+
     for (auto& ctx : m_contexts) {
-        ctx->exit();
+        ctx->exit(key);
     }
 
     return *this;

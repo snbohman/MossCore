@@ -15,8 +15,6 @@
 #include <moss/meta/defines.hpp>
 #include <moss/commands/primitives.hpp>
 
-class C;
-
 namespace moss {
 
 namespace key {
@@ -53,7 +51,7 @@ public:
     Key<P>& operator=(Key<P>&&) = delete;
  
 private:
-    friend class Contex;
+    friend class App;
     template<typename Wth, typename Vw> friend class commands::Query;
     template<typename Wth> friend class commands::DynamicQuery;
     template<typename Inc, typename Ex> friend class commands::View;
