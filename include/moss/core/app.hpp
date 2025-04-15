@@ -12,6 +12,7 @@
 #pragma once
 
 #include <moss/core/contex.hpp>
+#include <moss/core/mirror.hpp>
 #include <moss/ecs/ecs.hpp>
 
 
@@ -19,17 +20,30 @@ namespace moss {
 
 class App {
 public:
-    void init();
-    void build();
-    void run();
- 1   void clean();
-    void exit();
+    App& instance();
+    App& init();
+    App& build();
+    App& run();
+    App& exit();
 
     template<typename Ctx>
-    void attach();
+    App& mount() {
+        static_assert(
+            std::is_base_of<Contex, Ctx>::value,
+            "Expected all of T to inherit moss::Contex"
+        );
+
+        Mirror mirror;
+        mirror.m_registry = &m_registry;
+
+        Ctx c; c.init(mirror);
+        m_contexts.push_back(Ctx());
+    }
 
 private:
+    std::vector<Contex> m_contexts;
     entt::registry m_registry;
+    bool m_quit;
 };
 
 }

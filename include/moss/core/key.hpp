@@ -68,7 +68,7 @@ public:
     Key<P>& operator=(Key<P>&&) = delete;
  
 private:
-    friend class App;
+    friend class Contex;
     template<typename Wth, typename Vw> friend class commands::Query;
     template<typename Wth> friend class commands::DynamicQuery;
     template<typename Inc, typename Ex> friend class commands::View;

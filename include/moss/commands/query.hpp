@@ -30,7 +30,8 @@ template<typename... Wth, typename... VwInc, typename... VwEx>
 struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    void apply() { Contex<contex::READ>::get().apply(m_registry); m_view.apply(); }
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }
     void clean() { m_registry = nullptr; m_view.clean(); }
 
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = true) {
@@ -67,7 +68,8 @@ template<typename... Wth>
 struct DynamicQuery<With<Wth...>> {
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
-    void apply(Contex<contex::READ>& contex) { contex.}
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = true) {

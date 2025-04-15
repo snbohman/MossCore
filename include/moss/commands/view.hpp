@@ -32,7 +32,7 @@ class View<Include<Inc...>, Exclude<Ex...>> {
 
     static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
-    void apply(Key<key::WRITE>& key) { m_registry = key.registry; } 
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] auto view(bool doClean = true) {

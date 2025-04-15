@@ -25,7 +25,8 @@ public:
         return *this;
     }
 
-    template<typename... T> Mirror& attach() {
+    template<typename... T>
+    Mirror& attach() {
         static_assert(
             std::is_base_of<Component, T...>::value,
             "Expected all of T to inherit moss::Component"
@@ -37,7 +38,8 @@ public:
         return *this;
     }
 
-    template<typename... T> Mirror& connect() {
+    template<typename... T>
+    Mirror& connect() {
         static_assert(
             std::is_base_of<System, T...>::value,
             "Expected all of T to inherit moss::System"
@@ -50,6 +52,7 @@ public:
 
 private:
     friend class App;
+    Mirror() { }
 
     Contex m_contex;
     DynamicView m_view;

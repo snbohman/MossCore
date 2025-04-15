@@ -3,4 +3,3 @@
 
 #include <moss/ecs/component.hpp>
 #include <moss/ecs/system.hpp>
-#include <moss/ecs/package.hpp>

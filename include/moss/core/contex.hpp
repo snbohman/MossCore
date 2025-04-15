@@ -21,7 +21,7 @@ private:
     friend class Mirror;
 
     DynamicView m_view;
-    std::vector<System> m_systems;
+    std::vector<std::unique_ptr<System>> m_systems;
 };
 
 }

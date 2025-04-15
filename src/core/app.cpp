@@ -1,56 +1,45 @@
 #include <moss/core/app.hpp>
+#include <moss/core/key.hpp>
 #include <moss/ecs/system.hpp>
 #include <moss/logger/logger.hpp>
 
 
 using namespace moss;
 
-////////////////////////
-//// -- Lifetime -- ////
-////////////////////////
-void App::init() {
+
+App& App::instance() {
+    static App app;
+    return app;
+}
+
+App& App::init() {
     auto sink = std::make_shared<logger::MainSink<std::mutex>>();
     auto logger = std::make_shared<spdlog::logger>("MainLogger", sink);
     spdlog::set_default_logger(logger);
+
+    return *this;
 }
 
-void App::build() {
-    Contex<contex::READ>::init().inject(&m_registry);
-
-    for (entt::entity e : m_registry.view<System>()) {
-        m_registry.get<System>(e).build();
-        m_registry.get<System>(e).build();
-        m_registry.get<System>(e).build();
+App& App::build() {
+    for (Contex& ctx : m_contexts) {
+        ctx.build();
     }
-    
-    Contex<contex::WRITE>::destroy();
+
+    return *this;
 }
 
-void App::run() {
-    Contex<contex::READ>::init().inject(&m_registry);
-
+App& App::run() {
     while (!m_quit) {
-        for (entt::entity e : m_registry.view<System>()) {
-            m_registry.get<System>(e).tick();
-            m_registry.get<System>(e).tick();
-            m_registry.get<System>(e).tick();
+        for (Contex& ctx : m_contexts) {
+            ctx.tick();
         }
     }
 
-    Contex<contex::READ>::destroy();
+    return *this;
 }
 
-void App::clean() { }
-void App::exit() {
-    Contex<contex::WRITE>::init().inject(&m_registry);
-
-    for (entt::entity e : m_registry.view<System>()) {
-        m_registry.get<System>(e).exit();
-        m_registry.get<System>(e).exit();
-        m_registry.get<System>(e).exit();
-
-        m_registry.destroy(e);
-    }
-
-    Contex<contex::WRITE>::destroy();
+App& App::exit() {
+        for (Contex& ctx : m_contexts) {
+            ctx.exit();
+        }
 }
