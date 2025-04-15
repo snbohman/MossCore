@@ -13,18 +13,18 @@ struct PlayerTag : Component { };
 struct EnemyTag : Component { };
 
 class PlayerMovement : public System {
-    void build(Key<key::WRITE>& contex) override {
+    void build(const Key<key::WRITE>& contex, const DynamicView& entities) override {
         commands::DynamicQuery<With<Position>> q;
         q.apply(contex);
 
-        auto [pos] = q.pool({ entity });
+        auto [pos] = q.pool( entities );
         pos.x = 10; pos.y = 0;
     }
 
-    void tick(Key<key::WRITE>& contex) override {
+    void tick(const Key<key::WRITE>& contex, const DynamicView& entities) override {
         commands::DynamicQuery<With<Position>> q;
         q.apply(contex);
-        auto [pos] = q.pool({ entity });
+        auto [pos] = q.pool( entities );
 
         M_INFO("POS: {}-{}", pos.x, pos.y);
     }
@@ -32,20 +32,22 @@ class PlayerMovement : public System {
 
 class Player : public Contex {
     void init(Mirror& mirror) override {
-        mirror.create().attach<Position, PlayerTag>().connect<PlayerMovement>();
+        mirror.create()
+            .attach<Position, PlayerTag>()
+            .connect<PlayerMovement>();
     }
 };
 
 class World : public Contex {
     void init(Mirror& mirror) override {
         mirror
-            .plug<Player>();
+            .mount<Player>();
     }
 };
 
 TEST_CASE("Basic App") {
     App::init()
         .mount<World>()
-            .build()
-            .run();
+        .build()
+        .run();
 }

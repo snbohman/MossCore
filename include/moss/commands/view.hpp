@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <moss/core/contex.hpp>
+#include <moss/core/key.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss::commands {
@@ -32,7 +32,7 @@ class View<Include<Inc...>, Exclude<Ex...>> {
 
     static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
-    void apply() { Contex<contex::WRITE>::get().apply(m_registry); } 
+    void apply(Key<key::WRITE>& key) { m_registry = key.registry; } 
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] auto view(bool doClean = true) {

@@ -1,22 +1,22 @@
 #pragma once
 
-#include <moss/core/contex.hpp>
+#include <moss/core/key.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss {
 
-class Plugin {
+class System {
 public:
-    virtual ~Plugin() = default; 
+    virtual ~System() = default; 
 
     virtual void init()  { }
     virtual void build() { }
     virtual void tick()  { }
     virtual void exit()  { }
 
-    virtual void build(Contex<contex::WRITE>& contex) { }
-    virtual void tick(Contex<contex::READ>& contex)  { }
-    virtual void exit(Contex<contex::WRITE>& contex)  { }
+    virtual void build(Key<key::WRITE>& key) { }
+    virtual void tick(Key<key::READ>& key)  { }
+    virtual void exit(Key<key::WRITE>& key)  { }
 };
 
 }

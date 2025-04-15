@@ -22,7 +22,7 @@ public:
     void init();
     void build();
     void run();
-    void clean();
+ 1   void clean();
     void exit();
 
     template<typename Ctx>

@@ -42,16 +42,16 @@ using Pool = std::tuple<C...>;
 template<typename... C>
 using Atlas = std::vector<Pool<C...>&>;
 
-////////////////////
-//// -- Read -- ////
-////////////////////
+////////////////////////
+//// -- Commands -- ////
+////////////////////////
 namespace commands {
-
-template<typename... T>
-struct DynamicQuery;
 
 template<typename Include, typename Exclude>
 struct View;
+
+template<typename With>
+struct DynamicQuery;
 
 template<typename With, typename View>
 struct Query;

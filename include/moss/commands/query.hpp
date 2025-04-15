@@ -88,6 +88,7 @@ struct DynamicQuery<With<Wth...>> {
             otherwise expected"
         );
 
+        if (doClean) clean();
         return std::move(m_registry->get<Wth...>(*view.begin()));
     }
 
