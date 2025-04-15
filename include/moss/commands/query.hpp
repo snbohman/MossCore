@@ -27,7 +27,8 @@
 namespace moss::commands {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
-struct Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+public:
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
@@ -65,7 +66,8 @@ private:
 
 
 template<typename... Wth>
-struct DynamicQuery<With<Wth...>> {
+class DynamicQuery<With<Wth...>> {
+public:
     static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }

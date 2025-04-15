@@ -26,5 +26,20 @@ project "mossCoreTests"
     objdir "build/%{cfg.buildcfg}"
 
     files { "tests/**.cpp" }
-    includedirs { "external/doctest", "include" }
     links { "mossCore" }
+
+    includedirs {
+        "include",
+        "format",
+        "external/doctest",
+        "external/entt/single_include",
+        "external/spdlog/include"
+    }
+
+    filter "configurations:debug"
+        defines { "DEBUG" }
+        symbols "On"
+
+    filter "configurations:release"
+        defines { "NDEBUG" }
+        optimize "On"

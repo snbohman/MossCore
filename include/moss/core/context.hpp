@@ -1,5 +1,5 @@
 /**
- * @file    context.hpp
+ * @file    core/context.hpp
  * @brief   Defines the `Context` class that groups systems and manages entities.
  *
  * The `Context` class represents a collection of entities and systems.
@@ -27,7 +27,7 @@ class Mirror;
  * is performed via the Mirror class.
  *
  * The internal lifecycle (`build`, `tick`, `exit`) is managed by the engine and
- * should not be overridden. These methods apply to all systems registered during `init()`.
+ * *cant* be overridden. These methods apply to all systems registered during `init()`.
  */
 class Context {
 public:
@@ -40,6 +40,7 @@ public:
 
 private:
     friend class Mirror;
+    friend class App;
 
     DynamicView m_view;
     std::vector<std::unique_ptr<System>> m_systems;

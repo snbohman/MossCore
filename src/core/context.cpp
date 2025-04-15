@@ -1,4 +1,11 @@
+/**
+ * @file    core/context.cpp
+ * @brief   Implements the Contex class.
+ */
+
+
 #include <moss/core/context.hpp>
+#include <moss/core/mirror.hpp>
 #include <moss/core/key.hpp>
 
 using namespace moss;

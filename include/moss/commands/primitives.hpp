@@ -1,11 +1,11 @@
-/*
-core/commands/primitives.hpp
-
-Seperation used for importing purposes.
-Includes all declarations of the base 
-types and structs, but no further
-definitions.
-
+/**
+ * @file    commands/primitives.hpp
+ * @brief   Seperation of declerations of commands.
+ *
+ * Seperation used for importing purposes.
+ * Includes all declarations of the base 
+ * types and structs, but no further
+ * definitions.
 */
 
 #pragma once

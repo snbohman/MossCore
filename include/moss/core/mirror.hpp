@@ -50,7 +50,7 @@ public:
 
         for (glm::u32 i = 0; i < count; i++) {
             entt::entity e = m_registry->create();
-            m_view.push_back(e); m_contex.m_view.push_back(e);
+            m_view.push_back(e); m_contex->m_view.push_back(e);
         }
 
         return *this;
@@ -66,15 +66,15 @@ public:
      * @tparam T Components to attach to each entity.
      * @return Reference to this Mirror instance.
      */
-    template<typename... T>
+    template<typename T>
     Mirror& attach() {
         static_assert(
-            std::is_base_of<Component, T...>::value,
+            std::is_base_of_v<Component, T>,
             "Expected all of T to inherit moss::Component"
         );
 
         for (entt::entity entity : m_view)
-            m_registry->emplace<T...>(entity).init();
+            m_registry->emplace<T>(entity);
 
         return *this;
     }
@@ -91,11 +91,16 @@ public:
     template<typename... T>
     Mirror& connect() {
         static_assert(
-            std::is_base_of<System, T...>::value,
+            (std::is_base_of_v<System, T> && ...),
             "Expected all of T to inherit moss::System"
         );
 
-        m_contex.m_systems.push_back(std::make_unique<T>()...);
+        m_contex->m_systems.push_back(std::move(std::make_unique<T>()...));
+        return *this;
+    }
+
+    Mirror& inject(Context* context) {
+        m_contex = context;
         return *this;
     }
 
@@ -104,7 +109,7 @@ private:
     friend class App;
     Mirror() { }
 
-    Context m_contex;
+    Context* m_contex;
     DynamicView m_view;
     entt::registry* m_registry;
 };

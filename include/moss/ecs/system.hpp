@@ -35,7 +35,8 @@ namespace moss {
  */
 class System {
 public:
-    virtual ~System() = default; 
+    System() { init(); }
+    virtual ~System() = default;
 
     virtual void init()  { }
     virtual void build() { }

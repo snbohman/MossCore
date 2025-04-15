@@ -17,9 +17,9 @@ App& App::instance() {
 }
 
 App& App::init() {
-    auto sink = std::make_shared<logger::MainSink<std::mutex>>();
-    auto logger = std::make_shared<spdlog::logger>("MainLogger", sink);
-    spdlog::set_default_logger(logger);
+    /*auto sink = std::make_shared<logger::MainSink<std::mutex>>();*/
+    /*auto logger = std::make_shared<spdlog::logger>("MainLogger", sink);*/
+    /*spdlog::set_default_logger(logger);*/
 
     return *this;
 }

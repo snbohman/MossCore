@@ -1,5 +1,5 @@
 /**
- * @file    key.hpp
+ * @file    core/key.hpp
  * @brief   Defines the `Key` class and permission system for ECS commands.
  *
  * The `Key` class represents a permission system for commands in the ECS.

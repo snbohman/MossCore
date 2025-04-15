@@ -1,5 +1,5 @@
 /**
- * @file    app.hpp
+ * @file    core/app.hpp
  * @brief   Main application class responsible for lifecycle management.
  *
  * The `App` class orchestrates the overall application flow, managing
@@ -74,8 +74,8 @@ public:
 
         Mirror mirror;
         mirror.m_registry = &m_registry;
-
         auto ctx = std::make_unique<Ctx>();
+        mirror.m_contex = ctx.get();
         ctx->init(mirror);
         m_contexts.push_back(std::move(ctx));
 
@@ -83,9 +83,9 @@ public:
     }
 
 private:
-    std::vector<std::unique_ptr<Context>> m_contexts; /**< List of mounted contexts. */
-    entt::registry m_registry; /**< ECS registry for managing components. */
-    bool m_quit; /**< Flag indicating whether tick-loop should exit. */
+    std::vector<std::unique_ptr<Context>> m_contexts;
+    entt::registry m_registry;
+    bool m_quit;
 };
 
 }

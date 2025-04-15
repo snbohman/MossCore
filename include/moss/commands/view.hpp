@@ -27,6 +27,7 @@ namespace moss::commands {
 
 template<typename... Inc, typename... Ex>
 class View<Include<Inc...>, Exclude<Ex...>> {
+public:
     View() { }
     ~View() { }
 
