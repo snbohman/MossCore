@@ -42,7 +42,6 @@ public:
         ctx->init(mirror);
 
         m_contexts.push_back(std::move(ctx));
-
         return *this;
     }
 

@@ -103,22 +103,6 @@ public:
         return *this;
     }
 
-    /**
-     * @brief Connects mirror with a contex
-     *
-     * This method injects a contex into the mirror. A pointer is used for
-     * this, as it could be uninitialized. The mirror could be though as
-     * a mirror for the contex, which the user use inside the build contex
-     * method.
-     *
-     * @return Reference to this Mirror instance.
-     */
-    Mirror& inject(Context* context) {
-        m_contex = context;
-        return *this;
-    }
-
-
 private:
     friend class App;
     Mirror() { }
