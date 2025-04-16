@@ -21,6 +21,7 @@
 */
 
 #include <moss/meta/defines.hpp>
+#include <moss/core/key.hpp>
 #include <moss/core/context.hpp>
 #include <moss/commands/primitives.hpp>
 
@@ -30,6 +31,12 @@ template<typename... Wth, typename... VwInc, typename... VwEx>
 class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
 public:
     M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    Query() = default;
+    Query(const Key<key::READ>& key) { apply(key); }
+
+    static Query init() { return Query(); }
+    static Query init(const Key<key::READ>& key) { return Query(key); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
     void clean() { m_registry = nullptr; m_view.clean(); }
@@ -83,7 +90,15 @@ private:
 template<typename... Wth>
 class DynamicQuery<With<Wth...>> {
 public:
-    static_assert(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { apply(key); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
     void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }

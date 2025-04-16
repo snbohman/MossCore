@@ -24,7 +24,7 @@ inline void readConfig(json& j, const std::string& config, const std::string& da
     try {
         j = json::parse(std::fstream(configPath));
     } catch (std::exception e) {
-        ERROR_IF(j.empty(), "Json config from path \"{}\" found empty", configPath);
+        M_ERROR_IF(j.empty(), "Json config from path \"{}\" found empty", configPath);
     }
 }
 

@@ -70,15 +70,15 @@ public:
      * @tparam T Components to attach to each entity.
      * @return Reference to this Mirror instance.
      */
-    template<typename T>
+    template<typename... T>
     Mirror& attach() {
         static_assert(
-            std::is_base_of_v<Component, T>,
+            (std::is_base_of_v<Component, T> && ...),
             "Expected all of T to inherit moss::Component"
         );
 
         for (entt::entity entity : m_view)
-            m_registry->emplace<T>(entity);
+            (m_registry->emplace<T>(entity), ...);
 
         return *this;
     }
@@ -99,7 +99,7 @@ public:
             "Expected all of T to inherit moss::System"
         );
 
-        m_contex->m_systems.push_back(std::move(std::make_unique<T>()...));
+        m_contex->m_systems.push_back(std::move(std::make_unique<T>() ...));
         return *this;
     }
 

@@ -5,6 +5,11 @@
  * Simple attach component command used
  * by systems.
  *
+ * Divided into two groups, Attach and dynamic
+ * attach. Attach attaches components onto
+ * the tempalted given view. Dynamic attach
+ * attaches components, altough templated
+ * to a DynamicView.
  */
 
 #pragma once
@@ -21,6 +26,12 @@ template<typename... Wth, typename... VwInc, typename... VwEx>
 class Attach<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>> {
 public:
     M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    Attach() = default;
+    Attach(const Key<key::READ>& key) { apply(key); }
+
+    static Attach init() { return Attach(); }
+    static Attach init(const Key<key::READ>& key) { return Attach(key); }
 
     void apply(Key<key::READ> key) { m_registry = key.m_registry; m_view.apply(key); }
     void clean() { m_registry = nullptr; m_view.clean(); }
@@ -72,14 +83,24 @@ private:
     entt::registry* m_registry;
 };
 
-template<typename... Cmp>
-class DynamicAttach<With<Cmp...>> {
+template<typename... Wth>
+class DynamicAttach<With<Wth...>> {
 public:
+    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    DynamicAttach() = default;
+    DynamicAttach(const Key<key::READ>& key) { apply(key); }
+    DynamicAttach(const Key<key::WRITE>& key) { apply(key); }
+
+    static DynamicAttach init() { return DynamicAttach(); }
+    static DynamicAttach init(const Key<key::READ>& key) { return DynamicAttach(key); }
+    static DynamicAttach init(const Key<key::WRITE>& key) { return DynamicAttach(key); }
+
     void apply(Key<key::READ> key) { m_registry = key.m_registry; }
     void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
     void clean() { m_registry = nullptr; }
 
-    [[nodiscard]] Pool<Cmp...> pool(const DynamicView& view, bool doClean = false) {
+    [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = false) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -93,13 +114,13 @@ public:
         );
 
 
-        Pool<Cmp...> p = { m_registry->emplace<Cmp>(*view.begin())... };
+        Pool<Wth...> p = { m_registry->emplace<Wth>(*view.begin())... };
 
         if (doClean) clean();
         return std::move(p);
     }
 
-    [[nodiscard]] Atlas<Cmp...> atlas(const DynamicView& view, bool doClean = false) {
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -107,10 +128,10 @@ public:
             "View size is zero. Undefined behaviour is expected"
         );
 
-        Atlas<Cmp...> atlas;
+        Atlas<Wth...> atlas;
         atlas.reserve(view.size());
         for (auto& entity : view) {
-             atlas.push_back(std::move({ m_registry->emplace<Cmp>(entity)... }));
+             atlas.push_back(std::move({ m_registry->emplace<Wth>(entity)... }));
         }
 
         if (doClean) clean();

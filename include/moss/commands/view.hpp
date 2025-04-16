@@ -30,6 +30,12 @@ class View<Include<Inc...>, Exclude<Ex...>> {
 public:
     M_SA(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
     void clean() { m_registry = nullptr; }
 

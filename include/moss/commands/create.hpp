@@ -20,6 +20,14 @@ class Create {
 public:
     M_SA(N > 0, "Number of entities must be non-negative non-zero integer");
 
+    Create() = default;
+    Create(const Key<key::READ>& key) { apply(key); }
+    Create(const Key<key::WRITE>& key) { apply(key); }
+
+    static Create init() { return Create(); }
+    static Create init(const Key<key::READ>& key) { return Create(key); }
+    static Create init(const Key<key::WRITE>& key) { return Create(key); }
+
     void apply(Key<key::READ> key) { m_registry = key.m_registry; }
     void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
     void clean() { m_registry = nullptr; }

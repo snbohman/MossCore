@@ -1,10 +1,5 @@
 #include <doctest.h>
-#include <moss/meta/defines.hpp>
-#include <moss/core/app.hpp>
-#include <moss/core/mirror.hpp>
-#include <moss/core/context.hpp>
-#include <moss/ecs/system.hpp>
-#include <moss/commands/commands.hpp>
+#include <moss/moss.hpp>
 
 
 using namespace moss;
@@ -16,16 +11,36 @@ struct EnemyTag : Component { };
 class PlayerMovement : public System {
 public:
     void build(const Key<key::WRITE>& key, const DynamicView& entities) override {
-        commands::DynamicQuery<With<Position>> q;
-        q.apply(key);
-
-        auto [pos] = q.pool(entities);
-        pos.x = 10; pos.y = 30;
+        { // First option
+            auto [pos] = commands::DynamicQuery<
+                With<Position>
+            >::init(key).pool(entities);
+            pos.x = 10; pos.y = 30;
+        }
+        { // Second option
+            auto q = commands::DynamicQuery<With<Position>>::init(key);
+            auto [pos] = q.pool(entities);
+            pos.x = 10; pos.y = 30;
+        }
+        { // Thrid option
+            commands::DynamicQuery<With<Position>> q(key);
+            auto [pos] = q.pool(entities);
+            pos.x = 10; pos.y = 30;
+        }
+        { // Fourth option
+            commands::DynamicQuery<With<Position>> q;
+            q.apply(key);
+            auto [pos] = q.pool(entities);
+            pos.x = 10; pos.y = 30;
+        }
     }
 
     void tick(const Key<key::READ>& key, const DynamicView& entities) override {
-        commands::Query<With<Position>, commands::View< Include<Position>, Exclude<> >> q;
-        q.apply(key); auto [pos] = q.pool();
+        /* Usage can either be DynamicQuery, like in build, or now a usage of Query */
+        auto [pos] = commands::Query<
+            With<Position>,
+            commands::View<Include<PlayerTag>, Exclude<>>
+        >::init(key).pool();
 
         pos.x++; pos.y -= 2;
         CHECK(pos.x == 11);
@@ -41,8 +56,7 @@ class Player : public Context {
 public:
     void init(Mirror& mirror) override {
         mirror.create()
-            .attach<Position>()
-            .attach<PlayerTag>()
+            .attach<Position, PlayerTag>()
             .connect<PlayerMovement>();
     }
 };
