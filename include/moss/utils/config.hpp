@@ -1,9 +1,7 @@
-/*
-utils/config.hpp
-
-Implements utils::config with relevant reading functions.
-
-*/
+/**
+ * @file utils/config.hpp
+ * @brief Implements utils::config with relevant reading functions.
+ */
 
 #pragma once
 

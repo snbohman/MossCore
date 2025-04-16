@@ -1,9 +1,7 @@
-/*
-utils/math.hpp - parentless
-
-Implements utils::math with relevant helper functions.
-
-*/
+/**
+ * @file utils/math.hpp
+ * @brief Implements utils::math with relevant math functions.
+ */
 
 #pragma once
 

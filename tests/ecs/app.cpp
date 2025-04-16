@@ -46,9 +46,7 @@ public:
         CHECK(pos.x == 11);
         CHECK(pos.y == 28);
 
-        commands::Quit quit;
-        quit.apply(key);
-        quit.quit();
+        commands::Quit::init(key).quit();
     }
 };
 
