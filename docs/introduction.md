@@ -106,11 +106,13 @@ ensures that systems and commands can only access the components they have permi
 to. This helps to prevent systems from making unintended changes to components and 
 provides fine-grained control over the access rights of different systems.
 
-- **Key<READ>**: Used when a system only needs to read from components.
-- **Key<WRITE>**: Used when a system needs to modify components.
+- **Key<READ>**: Used when a system needs to query/view components.
+- **Key<WRITE>**: Used when a system only needs to query components from a set view.
 
 This system ensures that systems interact with the ECS registry in a secure and controlled 
-manner.
+manner. The build system for example only have a WRITE permission, as it is not ensured
+that every component is initialized. The tick system has a READ key, as it is more or less 
+continious and doesn't have the same risk of accessing old data.
 
 ---
 
@@ -124,6 +126,9 @@ is both performant and easy to extend with custom logic.
 Additionally, the use of the **ECS** pattern makes it easy to add new features without tightly 
 coupling systems or components together. If you need a new system or component, it can be 
 added with minimal changes to existing code.
+
+Unit testing is also easy. All context can be run, so if there is a problem with the player
+logic, just run the player contex, and not all the others.
 
 ---
 

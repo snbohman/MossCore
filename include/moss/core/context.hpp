@@ -27,7 +27,7 @@ class Mirror;
  * is performed via the Mirror class.
  *
  * The internal lifecycle (`build`, `tick`, `exit`) is managed by the engine and
- * *cant* be overridden. These methods apply to all systems registered during `init()`.
+ * *can't* be overridden. These methods apply to all systems registered during `init()`.
  */
 class Context {
 public:

@@ -1,0 +1,124 @@
+/**
+ * @file commands/attach.hpp
+ * @brief Attach command specification
+ *
+ * Simple attach component command used
+ * by systems.
+ *
+ */
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/defines.hpp>
+#include <moss/core/key.hpp>
+#include <moss/commands/primitives.hpp>
+
+
+namespace moss::commands {
+
+template<typename... Wth, typename... VwInc, typename... VwEx>
+class Attach<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>> {
+public:
+    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    void apply(Key<key::READ> key) { m_registry = key.m_registry; m_view.apply(key); }
+    void clean() { m_registry = nullptr; m_view.clean(); }
+
+    [[nodiscard]] Pool<Wth...> pool(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto view = m_view.view(doClean);
+        M_ERROR_IFF(view.size() > 1,
+            "View size is greater than one. Consider using \
+            an Atlas instead. Undefined behaviour is \
+            otherwise expected"
+        );
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+
+        Pool<Wth...> p = { m_registry->emplace<Wth>(*view.begin())... };
+
+        if (doClean) clean();
+        return std::move(p);
+    }
+
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto view = m_view.view(doClean);
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+        Atlas<Wth...> atlas;
+        atlas.reserve(view.size());
+        for (auto& entity : view) {
+             atlas.push_back(std::move({ m_registry->emplace<Wth>(entity)... }));
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
+    entt::registry* m_registry;
+};
+
+template<typename... Cmp>
+class DynamicAttach<With<Cmp...>> {
+public:
+    void apply(Key<key::READ> key) { m_registry = key.m_registry; }
+    void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] Pool<Cmp...> pool(const DynamicView& view, bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+        M_ERROR_IFF(view.size() > 1,
+            "View size is greater than one. Consider using \
+            an Atlas instead. Undefined behaviour is \
+            otherwise expected"
+        );
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+
+        Pool<Cmp...> p = { m_registry->emplace<Cmp>(*view.begin())... };
+
+        if (doClean) clean();
+        return std::move(p);
+    }
+
+    [[nodiscard]] Atlas<Cmp...> atlas(const DynamicView& view, bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+        Atlas<Cmp...> atlas;
+        atlas.reserve(view.size());
+        for (auto& entity : view) {
+             atlas.push_back(std::move({ m_registry->emplace<Cmp>(entity)... }));
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    entt::registry* m_registry;
+};
+
+}

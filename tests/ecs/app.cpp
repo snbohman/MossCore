@@ -4,8 +4,7 @@
 #include <moss/core/mirror.hpp>
 #include <moss/core/context.hpp>
 #include <moss/ecs/system.hpp>
-#include <moss/commands/primitives.hpp>
-#include <moss/commands/query.hpp>
+#include <moss/commands/commands.hpp>
 
 
 using namespace moss;
@@ -21,15 +20,16 @@ public:
         q.apply(key);
 
         auto [pos] = q.pool(entities);
-        pos.x = 10; pos.y = 0;
+        pos.x = 10; pos.y = 30;
     }
 
     void tick(const Key<key::READ>& key, const DynamicView& entities) override {
-        commands::DynamicQuery<With<Position>> q;
-        q.apply(key);
-        auto [pos] = q.pool(entities);
+        commands::Query<With<Position>, commands::View< Include<Position>, Exclude<> >> q;
+        q.apply(key); auto [pos] = q.pool();
 
-        M_INFO("POS: {}-{}", pos.x, pos.y);
+        pos.x++; pos.y -= 2;
+        if ((int)pos.x % 100 == 0) { M_INFOF("x100"); }
+        if ((int)pos.y % 100 == 0) { M_INFOF("y100"); }
     }
 };
 
@@ -44,8 +44,8 @@ public:
 };
 
 TEST_CASE("Basic App") {
-    App app;
-    app.init()
+    App::instance()
+        .init()
         .mount<Player>()
         .build()
         .run()

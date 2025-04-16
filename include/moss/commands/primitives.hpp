@@ -37,10 +37,10 @@ struct With { };
 using DynamicView = std::vector<Entity>;
 
 template<typename... C>
-using Pool = std::tuple<C...>;
+using Pool = std::tuple<C&...>;
 
 template<typename... C>
-using Atlas = std::vector<Pool<C...>&>;
+using Atlas = std::vector<Pool<C&...>&>;
 
 ////////////////////////
 //// -- Commands -- ////
@@ -48,13 +48,22 @@ using Atlas = std::vector<Pool<C...>&>;
 namespace commands {
 
 template<typename Include, typename Exclude>
-struct View;
-
-template<typename With>
-struct DynamicQuery;
+class View;
 
 template<typename With, typename View>
-struct Query;
+class Query;
+
+template<typename With>
+class DynamicQuery;
+
+template<int N>
+class Create;
+
+template<typename Components, typename View>
+class Attach;
+
+template<typename With>
+class DynamicAttach;
 
 }
 

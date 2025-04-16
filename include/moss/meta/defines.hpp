@@ -1,38 +1,37 @@
-/*
-meta/defines.hpp
-
-Defines log macros, utelizing spdlog.
-
-*/
+/**
+ * @file meta/defines.hpp
+ * @brief Defines log macros
+ *
+ * Defines spdlog log macros and static assert
+ * macros.
+ */
 
 
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <fmt/format.h>
 
-namespace moss {
 
-#define M_SA(condition, message) static_assert(condition, message)
+#define M_SA(condition, message) static_assert(condition, "[MOSS] " message)
 
-#define M_ERROR(message, ...)   spdlog::error(message, __VA_ARGS__)
-#define M_WARN(message, ...)    spdlog::warn(message, __VA_ARGS__)
-#define M_INFO(message, ...)    spdlog::info(message, __VA_ARGS__)
-#define M_DEB(message, ...)     spdlog::debug(message, __VA_ARGS__)
+#define M_LOG(level, message, ...) spdlog::log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, message, ##__VA_ARGS__)
 
-#define M_ERRORF(message)   spdlog::error(message)
-#define M_WARNF(message)    spdlog::warn(message)
-#define M_INFOF(message)    spdlog::info(message)
-#define M_DEBF(message)     spdlog::debug(message)
+#define M_ERROR(message, ...) M_LOG(spdlog::level::err, message, ##__VA_ARGS__)
+#define M_WARN(message, ...)  M_LOG(spdlog::level::warn, message, ##__VA_ARGS__)
+#define M_INFO(message, ...)  M_LOG(spdlog::level::info, message, ##__VA_ARGS__)
+#define M_DEB(message, ...)   M_LOG(spdlog::level::debug, message, ##__VA_ARGS__)
 
-#define M_ERROR_IF(statement, message, ...) if (statement) M_ERROR(message, __VA_ARGS__)
-#define M_WARN_IF(statement, message, ...)  if (statement) M_WARN(message, __VA_ARGS__)
-#define M_INFO_IF(statement, message, ...)  if (statement) M_ERROR(message, __VA_ARGS__)
-#define M_DEB_IF(statement, message, ...)   if (statement) M_WARN(message, __VA_ARGS__)
+#define M_ERRORF(message) M_ERROR(message)
+#define M_WARNF(message)  M_WARN(message)
+#define M_INFOF(message)  M_INFO(message)
+#define M_DEBF(message)   M_DEB(message)
 
-#define M_ERROR_IFF(statement, message)  if (statement) M_ERRORF(message)
-#define M_WARN_IFF(statement, message) if (statement) M_WARNF(message)
-#define M_INFO_IFF(statement, message) if (statement) M_ERRORF(message)
-#define M_DEB_IFF(statement, message)  if (statement) M_WARNF(message)
+#define M_ERROR_IF(cond, message, ...) do { if (cond) M_ERROR(message, ##__VA_ARGS__); } while (0)
+#define M_WARN_IF(cond, message, ...) do { if (cond) M_WARN(message, ##__VA_ARGS__); } while (0)
+#define M_INFO_IF(cond, message, ...) do { if (cond) M_INFO(message, ##__VA_ARGS__); } while (0)
+#define M_DEB_IF(cond, message, ...) do { if (cond) M_DEB(message, ##__VA_ARGS__); } while (0)
 
-} // moss
+#define M_ERROR_IFF(cond, message) do { if (cond) M_ERRORF(message); } while (0)
+#define M_WARN_IFF(cond, message) do { if (cond) M_WARNF(message); } while (0)
+#define M_INFO_IFF(cond, message) do { if (cond) M_INFOF(message); } while (0)
+#define M_DEB_IFF(cond, message) do { if (cond) M_DEBF(message); } while (0)

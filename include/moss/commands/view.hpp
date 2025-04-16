@@ -31,13 +31,15 @@ public:
     View() { }
     ~View() { }
 
-    static_assert(sizeof...(Inc), "Include<> is required to have at least one component specified");
+    M_SA(sizeof...(Inc), "Include<> is required to have at least one component specified");
 
-    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
     void clean() { m_registry = nullptr; }
 
-    [[nodiscard]] auto view(bool doClean = true) {
-        static_assert(m_registry == nullptr, "Apply function must be called before aquiring view");
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
 
         if constexpr (sizeof...(Ex) == 0) {
             auto v = m_registry->view<Inc...>();

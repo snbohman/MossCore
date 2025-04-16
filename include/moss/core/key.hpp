@@ -27,8 +27,8 @@ namespace key {
      * These control the ability to read or modify components in the ECS registry.
      */
     enum Permissions {
-        READ = 1 << 0,
-        WRITE = 1 << 1
+        READ,
+        WRITE
     };
 
 }
@@ -55,6 +55,9 @@ private:
     template<typename Wth, typename Vw> friend class commands::Query;
     template<typename Wth> friend class commands::DynamicQuery;
     template<typename Inc, typename Ex> friend class commands::View;
+    template<typename Cmp> friend class commands::DynamicAttach;
+    template<typename Cmp, typename View> friend class commands::Attach;
+    template<int N> friend class commands::Create;
 
     Key() = default;
     ~Key() = default;

@@ -4,9 +4,10 @@
  */
 
 #include <moss/core/app.hpp>
+#include <moss/meta/defines.hpp>
 #include <moss/core/key.hpp>
 #include <moss/ecs/system.hpp>
-#include <moss/logger/logger.hpp>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 
 using namespace moss;
@@ -17,9 +18,8 @@ App& App::instance() {
 }
 
 App& App::init() {
-    /*auto sink = std::make_shared<logger::MainSink<std::mutex>>();*/
-    /*auto logger = std::make_shared<spdlog::logger>("MainLogger", sink);*/
-    /*spdlog::set_default_logger(logger);*/
+    spdlog::set_pattern("[MOSS] [%s] [%!] [%#]: %v");
+    spdlog::set_level(spdlog::level::debug);
 
     return *this;
 }
