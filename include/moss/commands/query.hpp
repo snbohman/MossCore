@@ -87,6 +87,34 @@ private:
 };
 
 
+/**
+ * @brief Wrapper around query without Exclude inside View
+ *
+ * Simple wrapper around the norma query. Has a query object
+ * lying inside and calling that whenever.
+ */
+template<typename... Wth, typename... VwInc>
+class Query<With<Wth...>, View< Include<VwInc...>> > {
+public:
+    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
+
+    Query() = default;
+    Query(const Key<key::READ>& key) { q.apply(key); }
+
+    static Query init() { return Query(); }
+    static Query init(const Key<key::READ>& key) { return Query(key); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
+    [[nodiscard]] Pool<Wth...> pool(bool doClean = false) { return std::move(q.pool(doClean)); }
+
+private:
+    Query<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
+};
+
 template<typename... Wth>
 class DynamicQuery<With<Wth...>> {
 public:

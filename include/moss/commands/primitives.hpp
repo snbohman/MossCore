@@ -47,7 +47,7 @@ using Atlas = std::vector<Pool<C&...>&>;
 ////////////////////////
 namespace commands {
 
-template<typename Include, typename Exclude>
+template<typename Include, typename Exclude = void>
 class View;
 
 template<typename With, typename View>

@@ -59,4 +59,32 @@ private:
     entt::registry* m_registry = nullptr;
 };
 
+template<typename... Inc>
+class View<Include<Inc...>, void> {
+public:
+    M_SA(sizeof...(Inc), "Include<> is required to have at least one component");
+
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto v = m_registry->view<Inc...>();
+        if (doClean) clean();
+        return std::move(v);
+    }
+
+private:
+    entt::registry* m_registry = nullptr;
+};
+
 }

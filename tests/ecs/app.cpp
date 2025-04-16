@@ -39,7 +39,7 @@ public:
         /* Usage can either be DynamicQuery, like in build, or now a usage of Query */
         auto [pos] = commands::Query<
             With<Position>,
-            commands::View<Include<PlayerTag>, Exclude<>>
+            commands::View<Include<PlayerTag>>
         >::init(key).pool();
 
         pos.x++; pos.y -= 2;
