@@ -65,6 +65,8 @@ class Attach;
 template<typename With>
 class DynamicAttach;
 
+class Quit;
+
 }
 
 }

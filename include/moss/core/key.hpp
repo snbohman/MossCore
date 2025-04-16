@@ -58,11 +58,13 @@ private:
     template<typename Cmp> friend class commands::DynamicAttach;
     template<typename Cmp, typename View> friend class commands::Attach;
     template<int N> friend class commands::Create;
+    friend class commands::Quit;
 
     Key() = default;
     ~Key() = default;
 
     entt::registry* m_registry;
+    bool* m_quit;
 };
 
 }

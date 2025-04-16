@@ -27,6 +27,7 @@ App& App::init() {
 App& App::build() {
     Key<key::WRITE> key;
     key.m_registry = &m_registry;
+    key.m_quit = &m_quit;
 
     for (auto& ctx : m_contexts) {
         ctx->build(key);
@@ -38,6 +39,7 @@ App& App::build() {
 App& App::run() {
     Key<key::READ> key;
     key.m_registry = &m_registry;
+    key.m_quit = &m_quit;
 
     while (!m_quit) {
         for (auto& ctx : m_contexts) {
@@ -51,6 +53,7 @@ App& App::run() {
 App& App::exit() {
     Key<key::WRITE> key;
     key.m_registry = &m_registry;
+    key.m_quit = &m_quit;
 
     for (auto& ctx : m_contexts) {
         ctx->exit(key);

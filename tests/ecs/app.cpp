@@ -28,8 +28,12 @@ public:
         q.apply(key); auto [pos] = q.pool();
 
         pos.x++; pos.y -= 2;
-        if ((int)pos.x % 100 == 0) { M_INFOF("x100"); }
-        if ((int)pos.y % 100 == 0) { M_INFOF("y100"); }
+        CHECK(pos.x == 11);
+        CHECK(pos.y == 28);
+
+        commands::Quit quit;
+        quit.apply(key);
+        quit.quit();
     }
 };
 
