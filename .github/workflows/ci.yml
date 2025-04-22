@@ -38,4 +38,4 @@ jobs:
         run: make -C scripts
 
       - name: Run tests
-        run: ./bin/debug/mossCoreTests
+        run: ./bin/debug/Tests
