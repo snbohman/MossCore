@@ -8,7 +8,7 @@
 #include <moss/core/mirror.hpp>
 #include <moss/core/key.hpp>
 
-using namespace moss;
+namespace moss {
 
 void Context::build(const Key<key::WRITE>& key) {
     for (auto& s : m_systems) {
@@ -32,4 +32,6 @@ void Context::exit(const Key<key::WRITE>& key) {
         s->exit(key);
         s->exit(key, m_view);
     }
+}
+
 }

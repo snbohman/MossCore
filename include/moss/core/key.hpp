@@ -12,7 +12,7 @@
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <moss/meta/defines.hpp>
+#include <moss/meta/log.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss {

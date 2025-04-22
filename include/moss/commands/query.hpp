@@ -20,12 +20,12 @@
  *     This provides flexibility but sacrifices compile-time safety.
 */
 
-#include <moss/meta/defines.hpp>
+#include <moss/meta/log.hpp>
 #include <moss/core/key.hpp>
 #include <moss/core/context.hpp>
 #include <moss/commands/primitives.hpp>
 
-namespace moss::commands {
+namespace moss {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
 class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {

@@ -11,10 +11,9 @@
 
 #pragma once
 
-#include <moss/meta/defines.hpp>
+#include <moss/meta/log.hpp>
 #include <moss/core/context.hpp>
 #include <moss/core/mirror.hpp>
-#include <moss/ecs/ecs.hpp>
 
 
 namespace moss {

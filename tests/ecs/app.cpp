@@ -12,23 +12,21 @@ class PlayerMovement : public System {
 public:
     void build(const Key<key::WRITE>& key, const DynamicView& entities) override {
         { // First option
-            auto [pos] = commands::DynamicQuery<
-                With<Position>
-            >::init(key).pool(entities);
+            auto [pos] = cmd::DynamicQuery<With<Position>>::init(key).pool(entities);
             pos.x = 10; pos.y = 30;
         }
         { // Second option
-            auto q = commands::DynamicQuery<With<Position>>::init(key);
+            auto q = cmd::DynamicQuery<With<Position>>::init(key);
             auto [pos] = q.pool(entities);
             pos.x = 10; pos.y = 30;
         }
         { // Thrid option
-            commands::DynamicQuery<With<Position>> q(key);
+            cmd::DynamicQuery<With<Position>> q(key);
             auto [pos] = q.pool(entities);
             pos.x = 10; pos.y = 30;
         }
         { // Fourth option
-            commands::DynamicQuery<With<Position>> q;
+            cmd::DynamicQuery<With<Position>> q;
             q.apply(key);
             auto [pos] = q.pool(entities);
             pos.x = 10; pos.y = 30;
@@ -37,16 +35,16 @@ public:
 
     void tick(const Key<key::READ>& key, const DynamicView& entities) override {
         /* Usage can either be DynamicQuery, like in build, or now a usage of Query */
-        auto [pos] = commands::Query<
+        auto [pos] = cmd::Query<
             With<Position>,
-            commands::View<Include<PlayerTag>>
+            cmd::View<Include<PlayerTag>>
         >::init(key).pool();
 
         pos.x++; pos.y -= 2;
         CHECK(pos.x == 11);
         CHECK(pos.y == 28);
 
-        commands::Quit::init(key).quit();
+        cmd::Quit::init(key).quit();
     }
 };
 

@@ -4,13 +4,12 @@
  */
 
 #include <moss/core/app.hpp>
-#include <moss/meta/defines.hpp>
 #include <moss/core/key.hpp>
 #include <moss/ecs/system.hpp>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
 
-using namespace moss;
+namespace moss {
 
 App& App::instance() {
     static App app;
@@ -60,4 +59,6 @@ App& App::exit() {
     }
 
     return *this;
+}
+
 }

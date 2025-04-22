@@ -1,6 +1,6 @@
 /**
- * @file meta/defines.hpp
- * @brief Defines log macros
+ * @file    meta/defines.hpp
+ * @brief   Defines log macros
  *
  * Defines spdlog log macros and static assert
  * macros.
