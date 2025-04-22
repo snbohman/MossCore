@@ -57,6 +57,7 @@ public:
     }
 };
 
+
 TEST_CASE("Basic App") {
     App::instance()
         .init()

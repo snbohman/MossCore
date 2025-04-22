@@ -76,7 +76,7 @@ public:
             "View size is zero. Undefined behaviour is expected"
         );
 
-        Pool pool = { m_registry->get<Wth>(*eView.begin())... };
+        Pool<Wth...> pool = { m_registry->get<Wth>(*eView.begin())... };
         if (doClean) clean();
         return std::move(pool);
     }
@@ -165,7 +165,7 @@ public:
             "View size is zero. Undefined behaviour is expected"
         );
 
-        Pool pool = { m_registry->get<Wth>(*view.begin())... };
+        Pool<Wth...> pool = { m_registry->get<Wth>(*view.begin())... };
         if (doClean) clean();
         return std::move(pool);
     }
