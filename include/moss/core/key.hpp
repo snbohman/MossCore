@@ -12,7 +12,7 @@
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <moss/meta/log.hpp>
+#include <moss/meta/logs.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss {
@@ -57,7 +57,7 @@ private:
     template<typename Inc, typename Ex> friend class commands::View;
     template<typename Cmp> friend class commands::DynamicAttach;
     template<typename Cmp, typename View> friend class commands::Attach;
-    template<int N> friend class commands::Create;
+    template<u32 N> friend class commands::Create;
     friend class commands::Quit;
 
     Key() = default;

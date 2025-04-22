@@ -11,6 +11,7 @@
 #pragma once
 
 #include <moss/meta/libs.hpp>
+#include <moss/meta/types.hpp>
 #include <moss/ecs/component.hpp>
 
 
@@ -56,7 +57,7 @@ class Query;
 template<typename With>
 class DynamicQuery;
 
-template<int N>
+template<u32 N>
 class Create;
 
 template<typename Components, typename View>

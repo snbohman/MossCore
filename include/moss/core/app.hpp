@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <moss/meta/log.hpp>
+#include <moss/meta/logs.hpp>
 #include <moss/core/context.hpp>
 #include <moss/core/mirror.hpp>
 

@@ -1,0 +1,35 @@
+name: Moss CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential wget unzip
+
+      - name: Download premake5
+        run: |
+          wget https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-linux.tar.gz
+          tar -xzf premake-5.0.0-alpha16-linux.tar.gz
+          sudo mv premake5 /usr/local/bin/
+
+      - name: Generate makefiles
+        run: premake5 gmake2
+
+      - name: Build project
+        run: make -C scripts mossCoreTests 
+
+      - name: Run tests
+        run: ./bin/debug/mossCoreTests

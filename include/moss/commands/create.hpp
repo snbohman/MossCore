@@ -9,13 +9,14 @@
 #pragma once
 
 #include <moss/meta/libs.hpp>
-#include <moss/meta/defines.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/meta/types.hpp>
 #include <moss/core/key.hpp>
 #include <moss/commands/primitives.hpp>
 
 namespace moss::commands {
 
-template<int N>
+template<u32 N>
 class Create {
 public:
     M_SA(N > 0, "Number of entities must be non-negative non-zero integer");
@@ -38,7 +39,7 @@ public:
         );
  
         DynamicView v;
-        for (int i = 0; i < N; i++) {
+        for (u32 i = 0; i < N; i++) {
             v.push_back(m_registry->create());
         }
 

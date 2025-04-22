@@ -12,9 +12,8 @@
 
 #include <moss/meta/libs.hpp>
 #include <moss/core/context.hpp>
-#include <moss/ecs/component.hpp>
-#include <moss/ecs/system.hpp>
 #include <moss/commands/primitives.hpp>
+#include <moss/ecs/ecs.hpp>
 
 
 namespace moss {
@@ -48,11 +47,11 @@ public:
      * @param count Number of entities to create (defaults to 1).
      * @return Reference to this Mirror instance.
      */
-    Mirror& create(glm::u32 count = 1) {
+    Mirror& create(u32 count = 1) {
         m_view.clear();
         m_view.reserve(count);
 
-        for (glm::u32 i = 0; i < count; i++) {
+        for (u32 i = 0; i < count; i++) {
             entt::entity e = m_registry->create();
             m_view.push_back(e); m_contex->m_view.push_back(e);
         }
