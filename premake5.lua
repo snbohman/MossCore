@@ -1,45 +1,56 @@
-project "mossCore"
-    kind "StaticLib"
-    targetdir "bin/%{cfg.buildcfg}"
-    objdir "build/%{cfg.buildcfg}"
+workspace "MossCore"
+    configurations { "debug", "release" }
 
-    files { "src/**.cpp" }
+    language "C++"
+    cppdialect "C++20"
+    architecture "x86_64"
+    toolset "clang"
 
-    includedirs {
-        "include",
-        "external/entt/single_include",
-        "external/spdlog/include"
-    }
+    location "scripts"
+    flags { "MultiProcessorCompile" }
 
-    filter "configurations:debug"
-        defines { "DEBUG" }
-        symbols "On"
+    project "Core"
+        kind "StaticLib"
+        targetdir "bin/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}"
 
-    filter "configurations:release"
-        defines { "NDEBUG" }
-        optimize "On"
+        files { "src/**.cpp" }
 
-project "mossCoreTests"
-    kind "ConsoleApp"
+        includedirs {
+            "include",
+            "external/entt/single_include",
+            "external/spdlog/include"
+        }
 
-    targetdir "bin/%{cfg.buildcfg}"
-    objdir "build/%{cfg.buildcfg}"
+        filter "configurations:debug"
+            defines { "DEBUG" }
+            symbols "On"
 
-    files { "tests/**.cpp" }
-    links { "mossCore" }
+        filter "configurations:release"
+            defines { "NDEBUG" }
+            optimize "On"
 
-    includedirs {
-        "include",
-        "format",
-        "external/doctest",
-        "external/entt/single_include",
-        "external/spdlog/include"
-    }
+    project "Tests"
+        kind "ConsoleApp"
 
-    filter "configurations:debug"
-        defines { "DEBUG" }
-        symbols "On"
+        targetdir "bin/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}"
 
-    filter "configurations:release"
-        defines { "NDEBUG" }
-        optimize "On"
+        files { "tests/**.cpp" }
+        links { "Core" }
+
+        includedirs {
+            "include",
+            "format",
+            "external/doctest",
+            "external/entt/single_include",
+            "external/spdlog/include"
+        }
+
+        filter "configurations:debug"
+            defines { "DEBUG" }
+            symbols "On"
+
+        filter "configurations:release"
+            defines { "NDEBUG" }
+            optimize "On"
