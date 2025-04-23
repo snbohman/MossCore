@@ -2,7 +2,7 @@ workspace "MossCore"
     configurations { "debug", "release" }
 
     language "C++"
-    cppdialect "C++23"
+    cppdialect "C++20"
     architecture "x86_64"
     toolset "clang"
 
