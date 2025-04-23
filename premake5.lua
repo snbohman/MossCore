@@ -2,7 +2,7 @@ workspace "MossCore"
     configurations { "debug", "release" }
 
     language "C++"
-    cppdialect "C++20"
+    cppdialect "C++23"
     architecture "x86_64"
     toolset "clang"
 
@@ -41,7 +41,7 @@ workspace "MossCore"
 
         includedirs {
             "include",
-            "format",
+            "tests/player-enemy/include",
             "external/doctest",
             "external/entt/single_include",
             "external/spdlog/include"
