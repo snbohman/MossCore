@@ -12,7 +12,7 @@ workspace "MossCore"
     project "Core"
         kind "StaticLib"
         targetdir "bin/%{cfg.buildcfg}"
-        objdir "build/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}/%{prj.name}"
 
         files { "src/**.cpp" }
 
@@ -34,7 +34,7 @@ workspace "MossCore"
         kind "ConsoleApp"
 
         targetdir "bin/%{cfg.buildcfg}"
-        objdir "build/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}/%{prj.name}"
 
         files { "tests/**.cpp" }
         links { "Core" }
