@@ -23,6 +23,7 @@
 #include <moss/core/key.hpp>
 #include <moss/commands/primitives.hpp>
 
+
 namespace moss::commands {
 
 template<typename... Inc, typename... Ex>
@@ -37,6 +38,7 @@ public:
     static View init(const Key<key::READ>& key) { return View(key); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void reg(entt::registry* reg) { m_registry = reg; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] auto view(bool doClean = false) {

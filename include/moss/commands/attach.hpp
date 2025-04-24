@@ -34,6 +34,7 @@ public:
     static Attach init(const Key<key::READ>& key) { return Attach(key); }
 
     void apply(Key<key::READ> key) { m_registry = key.m_registry; m_view.apply(key); }
+    void reg(entt::registry* reg) { m_registry = reg; m_view.reg(reg); }
     void clean() { m_registry = nullptr; m_view.clean(); }
 
     [[nodiscard]] Pool<Wth...> pool(bool doClean = false) {
@@ -98,6 +99,7 @@ public:
 
     void apply(Key<key::READ> key) { m_registry = key.m_registry; }
     void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
+    void reg(entt::registry* reg) { m_registry = reg; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = false) {

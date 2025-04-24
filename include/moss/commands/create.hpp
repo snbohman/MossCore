@@ -31,6 +31,7 @@ public:
 
     void apply(Key<key::READ> key) { m_registry = key.m_registry; }
     void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
+    void reg(entt::registry* reg) { m_registry = reg; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] DynamicView create(bool doClean = false) {

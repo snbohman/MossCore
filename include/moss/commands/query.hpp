@@ -39,6 +39,7 @@ public:
     static Query init(const Key<key::READ>& key) { return Query(key); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void reg(entt::registry* reg) { m_registry = reg; m_view.reg(reg); }
     void clean() { m_registry = nullptr; m_view.clean(); }
 
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
@@ -105,7 +106,7 @@ public:
     static Query init(const Key<key::READ>& key) { return Query(key); }
 
     void apply(const Key<key::READ>& key) { q.apply(key); }
-    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void reg(entt::registry* reg) { q.reg(reg); }
     void clean() { q.clean(); }
     
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
@@ -130,9 +131,8 @@ public:
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
     void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }
+    void reg(entt::registry* reg) { m_registry = reg; }
     void clean() { m_registry = nullptr; }
-
-    entt::registry* getReg() { return m_registry; }
 
     [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
         M_ERROR_IFF(m_registry == nullptr,
