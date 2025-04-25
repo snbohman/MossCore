@@ -17,6 +17,7 @@
 #include <moss/meta/libs.hpp>
 #include <moss/meta/logs.hpp>
 #include <moss/core/key.hpp>
+#include <moss/commands/view.hpp>
 #include <moss/commands/primitives.hpp>
 
 

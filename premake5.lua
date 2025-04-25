@@ -41,7 +41,7 @@ workspace "MossCore"
 
         includedirs {
             "include",
-            "tests/player-enemy/include",
+            "tests/include",
             "external/doctest",
             "external/entt/single_include",
             "external/spdlog/include"

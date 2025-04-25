@@ -7,7 +7,8 @@
 
 namespace tst {
 
-class Contex : moss::Context {
+class Contex : public moss::Context {
+public:
     void init(moss::Mirror& mirror) override {
         mirror
             .create(1).attach<CompA, CompB, CompC>()
