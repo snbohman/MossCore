@@ -1,2 +1,3 @@
-Consists of only one contex. Multiple systems. Systems are listed in the include
-dir. Each system does it's own thing on the entities created by the main contex.
+# Commands
+Uses the built in entt::registry funcs for ensuring that every
+command works properly.
