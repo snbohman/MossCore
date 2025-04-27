@@ -34,12 +34,14 @@ public:
 
     Query() = default;
     Query(const Key<key::READ>& key) { apply(key); }
+    Query(entt::registry* registry) { apply(registry); }
 
     static Query init() { return Query(); }
     static Query init(const Key<key::READ>& key) { return Query(key); }
+    static Query init(entt::registry* registry) { return Query(registry); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
-    void reg(entt::registry* reg) { m_registry = reg; m_view.reg(reg); }
+    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
     void clean() { m_registry = nullptr; m_view.clean(); }
 
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
@@ -54,8 +56,8 @@ public:
 
         Atlas<Wth...> atlas;
         atlas.reserve(std::distance(eView.begin(), eView.end()));
-        for (const auto& entity : eView) {
-            atlas.push_back(std::move({ m_registry->get<Wth>(entity)... }));
+        for (entt::entity entity : eView) {
+            atlas.push_back( { m_registry->get<Wth>(entity)... } );
         }
 
         if (doClean) clean();
@@ -101,12 +103,14 @@ public:
 
     Query() = default;
     Query(const Key<key::READ>& key) { q.apply(key); }
+    Query(entt::registry* registry) { q.apply(registry); }
 
     static Query init() { return Query(); }
     static Query init(const Key<key::READ>& key) { return Query(key); }
+    static Query init(entt::registry* registry) { return Query(registry); }
 
     void apply(const Key<key::READ>& key) { q.apply(key); }
-    void reg(entt::registry* reg) { q.reg(reg); }
+    void apply(entt::registry* registry) { q.apply(registry); }
     void clean() { q.clean(); }
     
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
@@ -124,14 +128,16 @@ public:
     DynamicQuery() = default;
     DynamicQuery(const Key<key::READ>& key) { apply(key); }
     DynamicQuery(const Key<key::WRITE>& key) { apply(key); }
+    DynamicQuery(entt::registry* registry) { apply(registry); }
 
     static DynamicQuery init() { return DynamicQuery(); }
     static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
     static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
 
     void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
     void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }
-    void reg(entt::registry* reg) { m_registry = reg; }
+    void apply(entt::registry* registry) { m_registry = registry; }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
@@ -145,7 +151,7 @@ public:
         Atlas<Wth...> atlas;
         atlas.reserve(view.size());
         for (const auto& entity : view) {
-            atlas.push_back(std::move({ m_registry->get<Wth>(entity)... }));
+            atlas.push_back( { m_registry->get<Wth>(entity)... } );
         }
 
         if (doClean) clean();

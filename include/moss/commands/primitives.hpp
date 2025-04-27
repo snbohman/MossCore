@@ -41,7 +41,7 @@ template<typename... C>
 using Pool = std::tuple<C&...>;
 
 template<typename... C>
-using Atlas = std::vector<Pool<C&...>&>;
+using Atlas = std::vector<Pool<C...>>;
 
 ////////////////////////
 //// -- Commands -- ////

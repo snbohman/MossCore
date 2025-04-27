@@ -6,7 +6,7 @@
 namespace tst {
 
 struct CompA : moss::Component {
-    const char* uId;
+    std::string uId;
 
     CompA(const char* id) : uId(id) { }
 };

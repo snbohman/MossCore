@@ -1,5 +1,6 @@
 #pragma once
 
+#include <doctest.h>
 #include <moss/moss.hpp>
 #include <tst/components.hpp>
 
@@ -54,6 +55,19 @@ inline entt::registry newRegistry() {
 
 inline u32 vSize(auto view) {
     return std::distance(view.begin(), view.end());
+}
+
+inline void uIdCheck(std::string_view input, const std::vector<std::string_view>& expected) {
+    std::ostringstream oss;
+    oss << "Input: [" << input << "], Expected: [";
+    for (size_t i = 0; i < expected.size(); ++i) {
+        oss << expected[i];
+        if (i + 1 < expected.size()) oss << ", ";
+    }
+    oss << "]";
+
+    INFO(oss.str());
+    CHECK(std::find(expected.begin(), expected.end(), input) != expected.end());
 }
 
 }
