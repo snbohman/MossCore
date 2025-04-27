@@ -48,4 +48,49 @@ TEST_CASE("Query") {
         }
     }
 
+    GIVEN("Mutability") {
+        GIVEN("Pool") {
+            {
+                auto [comp] = cmd::Query<
+                    With<tst::CompA>,
+                    cmd::View<Include<tst::CompA>, Exclude<tst::CompB, tst::CompC>>
+                >::init(&reg).pool();
+
+                comp.num = 10;
+            }
+            {
+                auto [comp] = cmd::Query<
+                    With<tst::CompA>,
+                    cmd::View<Include<tst::CompA>, Exclude<tst::CompB, tst::CompC>>
+                >::init(&reg).pool();
+
+                CHECK(comp.num == 10);
+            }
+        }
+
+        GIVEN("Atlas") {
+            {
+                Atlas<tst::CompA> atlas = cmd::Query<
+                    With<tst::CompA>,
+                    cmd::View<Include<tst::CompA>, Exclude<tst::CompB>>
+                >::init(&reg).atlas();
+
+                for (const auto& pool : atlas) {
+                    auto [comp] = pool;
+                    comp.num = 10;
+                }
+            }
+            {
+                Atlas<tst::CompA> atlas = cmd::Query<
+                    With<tst::CompA>,
+                    cmd::View<Include<tst::CompA>, Exclude<tst::CompB>>
+                >::init(&reg).atlas();
+
+                for (const auto& pool : atlas) {
+                    auto [comp] = pool;
+                    CHECK(comp.num == 10);
+                }
+            }
+        }
+    }
 }
