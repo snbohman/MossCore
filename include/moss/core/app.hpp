@@ -1,38 +1,53 @@
-/*
-core/app.hpp - parentless
-
-Core application.
-
-*/
+/**
+ * @file    core/app.hpp
+ * @brief   Main application class responsible for lifecycle management.
+ *
+ * The `App` class orchestrates the overall application flow, managing
+ * the ECS registry and systems. It provides methods for initialization,
+ * building, running, and cleaning up. The `App` itself does not directly
+ * interact with entities or systems; instead, it relies on the `Context` 
+ * class to manage them, with the `mount` method to add them.
+ */
 
 #pragma once
 
-#include <moss/core/scene.hpp>
-#include <moss/defines.hpp>
-#include <memory>
+#include <moss/meta/logs.hpp>
+#include <moss/core/context.hpp>
+#include <moss/core/mirror.hpp>
 
 
 namespace moss {
 
 class App {
 public:
-    App();
-    ~App();
-    void run();
+    static App& instance();
+    App& init();
+    App& build();
+    App& run();
+    App& exit();
 
-    void addScene(const char* id, const bool& currentScene);
-    void buildComponentRegistry(moss::types::ComponentRegistry& componentRegistry);
-    void setComponentRegistry(const moss::types::ComponentRegistry& componentRegistry);
-    void setCurrentScene(const char* id);
+    template<typename Ctx>
+    App& mount() {
+        static_assert(
+            std::is_base_of_v<Context, Ctx>,
+            "Ctx must inherit moss::Contex"
+        );
+
+        Mirror mirror;
+        mirror.m_registry = &m_registry;
+
+        auto ctx = std::make_unique<Ctx>();
+        mirror.m_contex = ctx.get();
+        ctx->init(mirror);
+
+        m_contexts.push_back(std::move(ctx));
+        return *this;
+    }
 
 private:
-    // -- These are only used by app (eventhough they seem public) -- //
-    // -- The components should have no access to these -- //
-    std::unique_ptr<moss::Scene>& getScene(const char* id);
-    std::unique_ptr<moss::Scene>& getCurrentScene();
-
+    std::vector<std::unique_ptr<Context>> m_contexts;
     entt::registry m_registry;
-    moss::types::ComponentRegistry m_componentRegistry;
+    bool m_quit;
 };
 
-} // moss
+}

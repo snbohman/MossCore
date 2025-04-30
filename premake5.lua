@@ -1,26 +1,63 @@
-workspace "moss"
-    configurations { "debug", "release" }
-    architecture "x86_64"
-    location "scripts"
-    toolset "clang"
-    linkoptions { "-fuse-ld=lld" } -- use more modern LLVM linker than default
-    buildoptions { "-Wno-macro-redefined"}
+-- Used for Github Actions unit testing
+local is_standalone = _ACTION and not _G.__root_workspace_defined
 
-project "mossCore"
-    kind "StaticLib"
-    language "C++"
-    cppdialect "C++17"
-    targetdir "bin/%{cfg.buildcfg}"
-    objdir "build/%{cfg.buildcfg}"
+if is_standalone then
+    _G.__root_workspace_defined = true
 
-    files { "src/**.cpp" }
-    includedirs { "include", "entt" }
-    links { "raylib", "fmt" }
+    workspace("MossDivided")
+        language "C++"
+        cppdialect "C++20"
+        architecture "x86_64"
+        toolset "clang"
 
-    filter "configurations:debug"
-        defines { "DEBUG" }
-        symbols "On"
+        location "scripts"
+        flags { "MultiProcessorCompile" }
+        configurations { "debug", "release" }
 
-    filter "configurations:release"
-        defines { "NDEBUG" }
-        optimize "On"
+        startproject("Core") -- Helpful in IDE
+end
+
+    project "Core"
+        kind "StaticLib"
+        location "scripts"
+        targetdir "bin/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}/%{prj.name}"
+
+        files { "src/**.cpp" }
+        includedirs {
+            "include",
+            "external/entt/single_include",
+            "external/spdlog/include"
+        }
+
+        filter "configurations:debug"
+            defines { "DEBUG" }
+            symbols "On"
+
+        filter "configurations:release"
+            defines { "NDEBUG" }
+            optimize "On"
+
+    project "CoreTests"
+        kind "ConsoleApp"
+        location "scripts"
+        targetdir "bin/%{cfg.buildcfg}"
+        objdir "build/%{cfg.buildcfg}/%{prj.name}"
+
+        files { "tests/**.cpp" }
+        links { "Core" }
+        includedirs {
+            "include",
+            "tests/include",
+            "external/doctest",
+            "external/entt/single_include",
+            "external/spdlog/include"
+        }
+
+        filter "configurations:debug"
+            defines { "DEBUG" }
+            symbols "On"
+
+        filter "configurations:release"
+            defines { "NDEBUG" }
+            optimize "On"
