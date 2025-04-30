@@ -32,10 +32,10 @@ jobs:
           sudo mv premake5 /usr/local/bin/
 
       - name: Generate makefiles
-        run: premake5 gmake
+        run: premake5 gmake2
 
       - name: Build project
         run: make -C scripts
 
       - name: Run tests
-        run: ./bin/debug/Tests
+        run: ./bin/debug/CoreTests

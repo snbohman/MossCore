@@ -26,4 +26,8 @@ struct CompC : moss::Component {
     CompC(const char* id, u32 n = 0) : uId(id), num(n) { }
 };
 
+struct CompD : moss::Component {
+    u32 num;
+};
+
 }
