@@ -1,142 +1,108 @@
-ChatGPT generated. It's way to dramatic, but I don't care enough to write my own :)
+# Moss Game Engine: Core Architecture
 
-# Moss Game Engine: Core Logic Overview
-
-Moss is a game engine built with a focus on simplicity, flexibility, and efficiency. 
-At its core, the engine is designed to manage game entities, components, and systems 
-using the **Entity-Component-System (ECS)** architecture. This architecture is inspired 
-by the likes of Bevy and Godot's scene systems, where entities represent objects in the 
-game world, components hold data, and systems perform the logic.
-
-In this overview, we will walk through the key components of the engine and how they 
-interact to create a modular and extensible framework for game development.
+Moss is a game engine built around the **Entity–Component–System (ECS)**
+pattern. Its design emphasizes clarity, modularity, and testability. This
+document introduces the core concepts: entities, components, systems, contexts,
+and the supporting abstractions that make them work together.
 
 ---
 
-## **1. Entity-Component-System (ECS)**
+## 1. Entity–Component–System (ECS)
 
-The engine follows the **ECS pattern** to manage game objects and logic. The ECS pattern 
-divides the game objects into three core parts:
+Moss uses ECS to separate **data** (components) from **behavior** (systems).  
 
-- **Entities**: These are unique identifiers representing game objects. They don't hold 
-  data themselves, but they link to components.
-  
-- **Components**: These are the data containers associated with entities. A component 
-  could store any type of data, such as position, velocity, or health.
+- **Entities** – Unique identifiers that represent objects in the game world.  
+- **Components** – Plain data structures attached to entities (e.g. `Position`, `Velocity`, `Health`).  
+- **Systems** – Functions that operate on entities with specific components. For example, a `PhysicsSystem` updates positions using velocities.  
 
-- **Systems**: These are responsible for the logic that operates on entities. Systems 
-  work by querying entities that have specific components and performing actions 
-  based on that data.
-
-### **How ECS Works in Moss:**
-- **Entities** are created and managed by a `Mirror` class, which interacts with the ECS 
-  registry.
-- **Components** are attached to entities via the `Mirror` class, and they hold the 
-  data needed by systems.
-- **Systems** are connected to the context via the `Mirror`, and they are responsible 
-  for updating entities based on the components attached to them.
+### ECS in Moss
+- Entities are created through a `Mirror`.  
+- Components are attached to entities via the `Mirror`.  
+- Systems access entities by declaring queries over components.  
 
 ---
 
-## **2. Context and Mirror**
+## 2. Contexts and Mirrors
 
-- **Context**: A context is a container that holds a set of systems and entities. It 
-  represents a group of systems that work together to handle specific logic for a part 
-  of the game. The `Context` class manages the lifecycle of the systems and entities, 
-  such as initialization, ticking (updating), and cleanup.
+Moss groups entities and systems into **contexts**. A context represents a
+specific area of logic (e.g. “player”, “physics”, or “UI”).  
 
-- **Mirror**: The `Mirror` class acts as a bridge between the game engine's ECS registry 
-  and the context. It is responsible for creating entities, attaching components, and 
-  connecting systems. Through `Mirror`, entities and components are managed and can 
-  be accessed by systems for processing.
+- **Context** – Holds a collection of systems and entities. Handles
+initialization, updates (ticks), and cleanup.  
+- **Mirror** – A fluent interface for working with entities and components
+inside a context. It creates entities, attaches components, and connects
+systems.  
 
-### **Key Operations of the Mirror**:
-- **create(count)**: Creates a specified number of entities.
-- **attach(Components...)**: Attaches components to all entities in the `Mirror`’s view.
-- **connect(Systems...)**: Connects systems to the context, allowing them to operate 
-  on entities.
-
-The `Mirror` class interacts with the `Context` class to group entities, components, and 
-systems, ensuring that they can interact in a meaningful way.
+**Common operations on a `Mirror`:**
+- `create(count)` – Creates entities.  
+- `attach(Components...)` – Adds components to the entities in scope.  
+- `connect(Systems...)` – Registers systems with the context.  
 
 ---
 
-## **3. Systems and Commands**
+## 3. Systems and Queries
 
-- **Systems** are the heart of the game logic. They perform actions based on the data 
-  in the components. For example, a `PhysicsSystem` might update the position of 
-  entities based on their velocity. A `HealthSystem` could check if any entities have 
-  reached zero health and trigger events accordingly.
+Systems contain the actual game logic. They read and modify components by declaring what data they require.  
 
-- **Commands**: To facilitate communication between systems and components, Moss 
-  provides a system of **commands**. Commands allow systems to query entities and 
-  components efficiently. These include:
-    - **DynamicQuery**: Dynamically queries entities for specific components during 
-      runtime.
-    - **View**: Represents a view of entities that match certain component criteria.
-    - **Query**: A static query that looks for entities with specific components.
+Moss provides query abstractions to let systems express their needs clearly:  
 
-The use of commands enables efficient and flexible interactions between systems and 
-components, ensuring that they can access and modify the data they need without tightly 
-coupling them together.
+- **Query** – A static query for entities with specific components (requires read access).  
+- **DynamicQuery** – A runtime query, used when requirements are not known ahead of time.  
+- **View** – A lightweight iterator over entities matching a set of components.  
+
+These queries keep systems decoupled from the ECS internals while still being efficient.  
 
 ---
 
-## **4. App Lifecycle**
+## 4. Application Lifecycle
 
-The application in Moss is managed through the `App` class, which is responsible for the 
-engine’s overall lifecycle. The `App` class orchestrates the initialization, building, 
-running, and exiting phases.
+The `App` class manages the overall engine lifecycle. It provides a consistent
+entry point for initialization, building contexts, running the main loop, and
+shutting down.  
 
-- **init()**: Initializes the app and any necessary components.
-- **build()**: Builds the app, setting up all contexts and systems.
-- **run()**: Starts the main loop, running the app’s logic.
-- **exit()**: Exits the app and cleans up all resources.
+- `init()` – Prepare global resources.  
+- `build()` – Set up contexts, entities, and systems.  
+- `run()` – Enter the main loop, ticking contexts in order.  
+- `exit()` – Clean up resources.  
 
-Within the `App` class, contexts are mounted and managed through the `mount()` method, 
-ensuring that the right systems and entities are initialized at the right time.
-
----
-
-## **5. Permissions System**
-
-To add control over how systems interact with the components, the engine uses a 
-**permissions system**. The `Key` class, defined by `Permissions` (read and write), 
-ensures that systems and commands can only access the components they have permission 
-to. This helps to prevent systems from making unintended changes to components and 
-provides fine-grained control over the access rights of different systems.
-
-- **Key<READ>**: Used when a system needs to query/view components.
-- **Key<WRITE>**: Used when a system only needs to query components from a set view.
-
-This system ensures that systems interact with the ECS registry in a secure and controlled 
-manner. The build system for example only have a WRITE permission, as it is not ensured
-that every component is initialized. The tick system has a READ key, as it is more or less 
-continious and doesn't have the same risk of accessing old data.
+Contexts are mounted into the app via `mount()`. Each tick, the app calls into
+the mounted contexts so their systems can process entities.  
 
 ---
 
-## **6. Flexibility and Extensibility**
+## 5. Permissions System
 
-Moss is designed to be highly flexible and extensible. The fluent interface for managing 
-contexts and systems allows for easy integration of new systems, components, and commands. 
-The use of modern C++ features such as templates and type traits ensures that the engine 
-is both performant and easy to extend with custom logic.
+Moss enforces controlled access to components using **permissions**. Each query
+or system must declare whether it intends to **read** or **write** component
+data.  
 
-Additionally, the use of the **ECS** pattern makes it easy to add new features without tightly 
-coupling systems or components together. If you need a new system or component, it can be 
-added with minimal changes to existing code.
+- **Key<READ>** – Grants read (and write) access. Used for ticking systems that rely on stable component data.  
+- **Key<WRITE>** – Grants write-only access. Often used at build time when initializing entities.  
 
-Unit testing is also easy. All context can be run, so if there is a problem with the player
-logic, just run the player contex, and not all the others.
+This ensures that systems cannot accidentally read uninitialized or stale data,
+and it makes the engine safer in concurrent or incremental-update scenarios.  
 
 ---
 
-## **Conclusion**
+## 6. Extensibility and Testing
 
-Moss provides a robust framework for developing games with a focus on simplicity and 
-flexibility. The use of ECS architecture ensures that the engine remains modular, scalable, 
-and easy to maintain. By separating data (components), logic (systems), and objects 
-(entities), Moss allows for powerful and efficient game development. With its permission 
-system, fluent interface, and extensible design, Moss is ready to handle any game logic 
-you need to implement.
+Moss is designed for incremental extension. Adding new systems or components
+requires minimal changes, since systems only depend on the components they
+query.  
+
+Contexts can be run independently, which makes it straightforward to write
+**unit tests** for isolated parts of the game logic. For example, the player
+context can be executed on its own without running the entire game.  
+
+---
+
+## Conclusion
+
+Moss provides a small but solid ECS foundation:  
+- Entities are lightweight IDs.  
+- Components are plain data.  
+- Systems express logic through queries.  
+- Contexts and mirrors provide structure and ergonomics.  
+- Permissions enforce safe access.  
+
+This architecture keeps data and logic separated, encourages modular design, and makes testing straightforward.  
