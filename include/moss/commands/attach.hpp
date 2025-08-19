@@ -40,7 +40,8 @@ public:
     void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
     void clean() { m_registry = nullptr; m_view.clean(); }
 
-    [[nodiscard]] Pool<Wth...> pool(bool doClean = false) {
+    template<typename... Args>
+    [[nodiscard]] Pool<Wth...> pool(bool doClean = false, Args&&... args) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -55,14 +56,16 @@ public:
             "View size is zero. Undefined behaviour is expected"
         );
 
-
-        Pool<Wth...> p = { m_registry->emplace<Wth>(*view.begin())... };
+        Pool<Wth...> p(
+            m_registry->emplace<Wth>(*view.begin(), args...)...
+        );
 
         if (doClean) clean();
         return std::move(p);
     }
 
-    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
+    template<typename... Args>
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false, Args&&... args) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -75,7 +78,9 @@ public:
         Atlas<Wth...> atlas;
         atlas.reserve(view.size());
         for (auto& entity : view) {
-             atlas.push_back({ m_registry->emplace<Wth>(entity)... });
+            atlas.push_back(Pool<Wth...>(
+                m_registry->emplace<Wth>(*view.begin(), args...)...
+            ));
         }
 
         if (doClean) clean();
@@ -107,7 +112,8 @@ public:
     void apply(entt::registry* registry) { m_registry = registry; }
     void clean() { m_registry = nullptr; }
 
-    Pool<Wth...> pool(const DynamicView& view, bool doClean = false) {
+    template<typename... Args>
+    [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = false, Args&&... args) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -121,13 +127,16 @@ public:
         );
 
 
-        Pool<Wth...> p = { m_registry->emplace<Wth>(*view.begin())... };
+        Pool<Wth...> p(
+            m_registry->emplace<Wth>(*view.begin(), args...)...
+        );
 
         if (doClean) clean();
         return std::move(p);
     }
 
-    Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+    template<typename... Args>
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false, Args&&... args) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
@@ -138,7 +147,9 @@ public:
         Atlas<Wth...> atlas;
         atlas.reserve(view.size());
         for (auto& entity : view) {
-             atlas.push_back({ m_registry->emplace<Wth>(entity)... });
+            atlas.push_back(Pool<Wth...>(
+                m_registry->emplace<Wth>(*view.begin(), args...)...
+            ));
         }
 
         if (doClean) clean();

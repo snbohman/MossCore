@@ -1,3 +1,2 @@
 # TODO
-## Aliases namespaces
-## vulkan rendering :)
+- attach add default params

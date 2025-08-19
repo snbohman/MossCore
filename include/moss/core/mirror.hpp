@@ -13,6 +13,7 @@
 #include <moss/meta/libs.hpp>
 #include <moss/core/context.hpp>
 #include <moss/commands/primitives.hpp>
+#include <moss/meta/logs.hpp>
 #include <moss/ecs/ecs.hpp>
 
 
@@ -31,9 +32,8 @@ namespace moss {
  * The `Mirror` is used internally by `Context` to register components and systems
  * and should not be used directly by users outside of the `Context`'s `init()` phase.
 
- * The mirror could be though as
- * a mirror for the contex, which the user use inside the build contex
- * method.
+ * The mirror could be though as a mirror for the contex, which the user use inside
+ * the build contex method.
  */
 class Mirror {
 public:
@@ -69,15 +69,15 @@ public:
      * @tparam T Components to attach to each entity.
      * @return Reference to this Mirror instance.
      */
-    template<typename... T>
-    Mirror& attach() {
-        static_assert(
+    template<typename... T, typename... Args>
+    Mirror& attach(Args&&... args) {
+        M_SA(
             (std::is_base_of_v<Component, T> && ...),
             "Expected all of T to inherit moss::Component"
         );
 
         for (entt::entity entity : m_view)
-            (m_registry->emplace<T>(entity), ...);
+            (m_registry->emplace<T>(entity, args...), ...);
 
         return *this;
     }
@@ -93,7 +93,7 @@ public:
      */
     template<typename... T>
     Mirror& connect() {
-        static_assert(
+        M_SA(
             (std::is_base_of_v<System, T> && ...),
             "Expected all of T to inherit moss::System"
         );

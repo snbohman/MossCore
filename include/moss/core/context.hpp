@@ -33,7 +33,7 @@ class Context {
 public:
     virtual ~Context() = default;
 
-    virtual void init(Mirror& mirror) { }
+    virtual void init(Mirror& mirror) { };
     void build(const Key<key::WRITE>& key);
     void tick(const Key<key::READ>& key);
     void exit(const Key<key::WRITE>& key);

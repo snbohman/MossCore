@@ -16,7 +16,6 @@ TEST_CASE("Attach") {
             comp.num = 9;
 
             CHECK(reg.get<tst::CompD>(e).num == 9);
-
             reg.destroy(e);
         }
 
