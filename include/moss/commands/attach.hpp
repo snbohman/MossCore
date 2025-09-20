@@ -24,10 +24,9 @@
 namespace moss::commands {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
+requires(sizeof...(Wth) > 0)
 class Attach<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>> {
 public:
-    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
-
     Attach() = default;
     Attach(const Key<key::READ>& key) { apply(key); }
     Attach(entt::registry* registry) { apply(registry); }
@@ -93,10 +92,9 @@ private:
 };
 
 template<typename... Wth>
+requires(sizeof...(Wth) > 0)
 class DynamicAttach<With<Wth...>> {
 public:
-    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
-
     DynamicAttach() = default;
     DynamicAttach(const Key<key::READ>& key) { apply(key); }
     DynamicAttach(const Key<key::WRITE>& key) { apply(key); }

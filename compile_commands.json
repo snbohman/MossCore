@@ -1,7 +1,7 @@
 [
   {
     "arguments": [
-      "/usr/bin/clang++",
+      "/etc/profiles/per-user/snbohman/bin/clang++",
       "-DDEBUG",
       "-I../include",
       "-I../external/entt/single_include",
@@ -14,13 +14,13 @@
       "../build/debug/Core/app.o",
       "../src/core/app.cpp"
     ],
-    "directory": "/Users/sixtenbohman/personal/mossSuite/core/scripts",
-    "file": "/Users/sixtenbohman/personal/mossSuite/core/src/core/app.cpp",
-    "output": "/Users/sixtenbohman/personal/mossSuite/core/build/debug/Core/app.o"
+    "directory": "/home/snbohman/dev/mossSuite/core/scripts",
+    "file": "/home/snbohman/dev/mossSuite/core/src/core/app.cpp",
+    "output": "/home/snbohman/dev/mossSuite/core/build/debug/Core/app.o"
   },
   {
     "arguments": [
-      "/usr/bin/clang++",
+      "/etc/profiles/per-user/snbohman/bin/clang++",
       "-DDEBUG",
       "-I../include",
       "-I../external/entt/single_include",
@@ -33,13 +33,13 @@
       "../build/debug/Core/context.o",
       "../src/core/context.cpp"
     ],
-    "directory": "/Users/sixtenbohman/personal/mossSuite/core/scripts",
-    "file": "/Users/sixtenbohman/personal/mossSuite/core/src/core/context.cpp",
-    "output": "/Users/sixtenbohman/personal/mossSuite/core/build/debug/Core/context.o"
+    "directory": "/home/snbohman/dev/mossSuite/core/scripts",
+    "file": "/home/snbohman/dev/mossSuite/core/src/core/context.cpp",
+    "output": "/home/snbohman/dev/mossSuite/core/build/debug/Core/context.o"
   },
   {
     "arguments": [
-      "/usr/bin/clang++",
+      "/etc/profiles/per-user/snbohman/bin/clang++",
       "-DDEBUG",
       "-I../include",
       "-I../tests/include",
@@ -54,13 +54,13 @@
       "../build/debug/CoreTests/attach.o",
       "../tests/src/commands/attach.cpp"
     ],
-    "directory": "/Users/sixtenbohman/personal/mossSuite/core/scripts",
-    "file": "/Users/sixtenbohman/personal/mossSuite/core/tests/src/commands/attach.cpp",
-    "output": "/Users/sixtenbohman/personal/mossSuite/core/build/debug/CoreTests/attach.o"
+    "directory": "/home/snbohman/dev/mossSuite/core/scripts",
+    "file": "/home/snbohman/dev/mossSuite/core/tests/src/commands/attach.cpp",
+    "output": "/home/snbohman/dev/mossSuite/core/build/debug/CoreTests/attach.o"
   },
   {
     "arguments": [
-      "/usr/bin/clang++",
+      "/etc/profiles/per-user/snbohman/bin/clang++",
       "-DDEBUG",
       "-I../include",
       "-I../tests/include",
@@ -75,13 +75,13 @@
       "../build/debug/CoreTests/query.o",
       "../tests/src/commands/query.cpp"
     ],
-    "directory": "/Users/sixtenbohman/personal/mossSuite/core/scripts",
-    "file": "/Users/sixtenbohman/personal/mossSuite/core/tests/src/commands/query.cpp",
-    "output": "/Users/sixtenbohman/personal/mossSuite/core/build/debug/CoreTests/query.o"
+    "directory": "/home/snbohman/dev/mossSuite/core/scripts",
+    "file": "/home/snbohman/dev/mossSuite/core/tests/src/commands/query.cpp",
+    "output": "/home/snbohman/dev/mossSuite/core/build/debug/CoreTests/query.o"
   },
   {
     "arguments": [
-      "/usr/bin/clang++",
+      "/etc/profiles/per-user/snbohman/bin/clang++",
       "-DDEBUG",
       "-I../include",
       "-I../tests/include",
@@ -96,8 +96,8 @@
       "../build/debug/CoreTests/view.o",
       "../tests/src/commands/view.cpp"
     ],
-    "directory": "/Users/sixtenbohman/personal/mossSuite/core/scripts",
-    "file": "/Users/sixtenbohman/personal/mossSuite/core/tests/src/commands/view.cpp",
-    "output": "/Users/sixtenbohman/personal/mossSuite/core/build/debug/CoreTests/view.o"
+    "directory": "/home/snbohman/dev/mossSuite/core/scripts",
+    "file": "/home/snbohman/dev/mossSuite/core/tests/src/commands/view.cpp",
+    "output": "/home/snbohman/dev/mossSuite/core/build/debug/CoreTests/view.o"
   }
 ]

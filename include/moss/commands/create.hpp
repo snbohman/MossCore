@@ -17,10 +17,9 @@
 namespace moss::commands {
 
 template<u32 N>
+requires(N > 0)
 class Create {
 public:
-    M_SA(N > 0, "Number of entities must be non-negative non-zero integer");
-
     Create() = default;
     Create(const Key<key::READ>& key) { apply(key); }
     Create(const Key<key::WRITE>& key) { apply(key); }

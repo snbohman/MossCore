@@ -58,6 +58,7 @@ template<typename With>
 class DynamicQuery;
 
 template<u32 N>
+requires(N > 0)
 class Create;
 
 template<typename Components, typename View>

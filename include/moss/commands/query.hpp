@@ -28,10 +28,9 @@
 namespace moss::commands {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
+requires(sizeof...(Wth) > 0)
 class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
 public:
-    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
-
     Query() = default;
     Query(const Key<key::READ>& key) { apply(key); }
     Query(entt::registry* registry) { apply(registry); }
@@ -97,10 +96,9 @@ private:
  * lying inside and calling that whenever.
  */
 template<typename... Wth, typename... VwInc>
+requires(sizeof...(Wth) > 0)
 class Query<With<Wth...>, View< Include<VwInc...>> > {
 public:
-    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
-
     Query() = default;
     Query(const Key<key::READ>& key) { q.apply(key); }
     Query(entt::registry* registry) { q.apply(registry); }
@@ -121,10 +119,9 @@ private:
 };
 
 template<typename... Wth>
+requires(sizeof...(Wth) > 0)
 class DynamicQuery<With<Wth...>> {
 public:
-    M_SA(sizeof...(Wth) > 0, "With<> is required to have at least one component");
-
     DynamicQuery() = default;
     DynamicQuery(const Key<key::READ>& key) { apply(key); }
     DynamicQuery(const Key<key::WRITE>& key) { apply(key); }

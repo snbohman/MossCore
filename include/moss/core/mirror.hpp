@@ -70,14 +70,11 @@ public:
      * @return Reference to this Mirror instance.
      */
     template<typename... T, typename... Args>
+    requires(std::is_base_of_v<Component, T> && ...)
     Mirror& attach(Args&&... args) {
-        M_SA(
-            (std::is_base_of_v<Component, T> && ...),
-            "Expected all of T to inherit moss::Component"
-        );
-
-        for (entt::entity entity : m_view)
+        for (entt::entity entity : m_view) {
             (m_registry->emplace<T>(entity, args...), ...);
+        }
 
         return *this;
     }
@@ -92,12 +89,8 @@ public:
      * @return Reference to this Mirror instance.
      */
     template<typename... T>
+    requires(std::is_base_of_v<System, T> && ...)
     Mirror& connect() {
-        M_SA(
-            (std::is_base_of_v<System, T> && ...),
-            "Expected all of T to inherit moss::System"
-        );
-
         m_contex->m_systems.push_back(std::move(std::make_unique<T>() ...));
         return *this;
     }

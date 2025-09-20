@@ -27,10 +27,9 @@
 namespace moss::commands {
 
 template<typename... Inc, typename... Ex>
+requires(sizeof...(Inc) > 0)
 class View<Include<Inc...>, Exclude<Ex...>> {
 public:
-    M_SA(sizeof...(Inc), "Include<> is required to have at least one component specified");
-
     View() = default;
     View(const Key<key::READ>& key) { apply(key); }
     View(entt::registry* registry) { apply(registry); }
@@ -64,10 +63,9 @@ private:
 };
 
 template<typename... Inc>
+requires(sizeof...(Inc) > 0)
 class View<Include<Inc...>, void> {
 public:
-    M_SA(sizeof...(Inc), "Include<> is required to have at least one component");
-
     View() = default;
     View(const Key<key::READ>& key) { apply(key); }
     View(entt::registry* registry) { apply(registry); }

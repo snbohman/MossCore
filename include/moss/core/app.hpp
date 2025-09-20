@@ -27,12 +27,8 @@ public:
     App& exit();
 
     template<typename Ctx>
+    requires(std::is_base_of_v<Context, Ctx>)
     App& mount() {
-        static_assert(
-            std::is_base_of_v<Context, Ctx>,
-            "Ctx must inherit moss::Contex"
-        );
-
         Mirror mirror;
         mirror.m_registry = &m_registry;
 
