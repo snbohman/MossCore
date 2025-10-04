@@ -1,6 +1,6 @@
 #pragma once
 
-#include <doctest.h>
+#include <doctest/doctest.h>
 #include <moss/moss.hpp>
 #include <tst/components.hpp>
 

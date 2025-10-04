@@ -26,8 +26,7 @@ end
         files { "src/**.cpp" }
         includedirs {
             "include",
-            "external/entt/single_include",
-            "external/spdlog/include"
+            "external",
         }
 
         filter "configurations:debug"
@@ -49,9 +48,7 @@ end
         includedirs {
             "include",
             "tests/include",
-            "external/doctest",
-            "external/entt/single_include",
-            "external/spdlog/include"
+            "external",
         }
 
         filter "configurations:debug"
