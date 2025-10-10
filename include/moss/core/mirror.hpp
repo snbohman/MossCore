@@ -32,7 +32,7 @@ namespace moss {
  * The `Mirror` is used internally by `Context` to register components and systems
  * and should not be used directly by users outside of the `Context`'s `init()` phase.
 
- * The mirror could be though as a mirror for the contex, which the user use inside
+ * The mirror could be thought of as a mirror for the contex, which the user use inside
  * the build contex method.
  */
 class Mirror {
