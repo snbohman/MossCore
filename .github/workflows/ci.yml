@@ -1,23 +1,27 @@
 name: Moss CI
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install dependencies
         run: |
           sudo apt update
           sudo apt install -y build-essential wget unzip
+
+      - name: Clone and factor external
+        run: |
+          chmod +x format_external.sh
+          ./format_external.sh
 
       - name: Download premake5
         run: |
