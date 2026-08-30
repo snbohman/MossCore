@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 cd external
 mv entt/single_include/entt ./entt_single_inc
