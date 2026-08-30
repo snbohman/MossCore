@@ -13,11 +13,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Clone and factor external
-        run: |
-          git submodule update --init
-          ./format_external.sh
-
       - name: Install dependencies
         run: |
           sudo apt update
