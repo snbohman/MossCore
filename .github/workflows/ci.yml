@@ -14,6 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Clone and factor external
+        run: |
+          git submodule update --init
+          ./format_external.sh
+
       - name: Install dependencies
         run: |
           sudo apt update
