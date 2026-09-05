@@ -14,10 +14,10 @@ if is_standalone then
         flags { "MultiProcessorCompile" }
         configurations { "debug", "release" }
 
-        startproject("Core") -- Helpful in IDE
+        startproject("mossCore") -- Helpful in IDE
 end
 
-    project "Core"
+    project "mossCore"
         kind "StaticLib"
         location "scripts"
         targetdir "bin/%{cfg.buildcfg}"
@@ -25,8 +25,7 @@ end
 
         files { "src/**.cpp" }
         includedirs {
-            "include",
-            "external",
+            "include"
         }
 
         filter "configurations:debug"
@@ -37,18 +36,17 @@ end
             defines { "NDEBUG" }
             optimize "On"
 
-    project "CoreTests"
+    project "mossCoreTests"
         kind "ConsoleApp"
         location "scripts"
         targetdir "bin/%{cfg.buildcfg}"
         objdir "build/%{cfg.buildcfg}/%{prj.name}"
 
         files { "tests/**.cpp" }
-        links { "Core" }
+        links { "mossCore" }
         includedirs {
             "include",
-            "tests/include",
-            "external",
+            "tests/include"
         }
 
         filter "configurations:debug"

@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential wget unzip zsh
+          sudo apt install -y build-essential wget unzip
 
       - name: Clone and factor external
         run: |
