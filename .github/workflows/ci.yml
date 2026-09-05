@@ -36,4 +36,4 @@ jobs:
         run: make -C scripts
 
       - name: Run tests
-        run: ./bin/debug/CoreTests
+        run: ./bin/debug/mossCoreTests
