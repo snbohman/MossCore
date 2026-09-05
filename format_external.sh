@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd external
+cd include 
 mv entt/single_include/entt ./entt_single_inc
 mv spdlog/include/spdlog ./spdlog_single_inc
 rm -rf entt

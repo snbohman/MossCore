@@ -34,9 +34,29 @@ public:
     virtual ~Context() = default;
 
     virtual void init(Mirror& mirror) { };
-    void build(const Key<key::WRITE>& key);
-    void tick(const Key<key::READ>& key);
-    void exit(const Key<key::WRITE>& key);
+    void build(const Key<key::WRITE>& key) {
+        for (auto& s : m_systems) {
+            s->build();
+            s->build(key);
+            s->build(key, m_view);
+        }
+    }
+
+    void tick(const Key<key::READ>& key) {
+        for (auto& s : m_systems) {
+            s->tick();
+            s->tick(key);
+            s->tick(key, m_view);
+        }
+    }
+
+    void exit(const Key<key::WRITE>& key) {
+        for (auto& s : m_systems) {
+            s->exit();
+            s->exit(key);
+            s->exit(key, m_view);
+        }
+    }
 
 private:
     friend class Mirror;

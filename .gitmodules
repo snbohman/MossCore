@@ -2,11 +2,11 @@
 	branch = main
 
 [submodule "external/entt"]
-    path = external/entt
+    path = inlcude/entt
     url = https://github.com/skypjack/entt
     shallow = true
 
 [submodule "external/spdlog"]
-    path = external/spdlog
+    path = include/spdlog
     url = https://github.com/gabime/spdlog
     shallow = true

@@ -13,28 +13,7 @@ if is_standalone then
         location "scripts"
         flags { "MultiProcessorCompile" }
         configurations { "debug", "release" }
-
-        startproject("mossCore") -- Helpful in IDE
 end
-
-    project "mossCore"
-        kind "StaticLib"
-        location "scripts"
-        targetdir "bin/%{cfg.buildcfg}"
-        objdir "build/%{cfg.buildcfg}/%{prj.name}"
-
-        files { "src/**.cpp" }
-        includedirs {
-            "include"
-        }
-
-        filter "configurations:debug"
-            defines { "DEBUG" }
-            symbols "On"
-
-        filter "configurations:release"
-            defines { "NDEBUG" }
-            optimize "On"
 
     project "mossCoreTests"
         kind "ConsoleApp"
@@ -43,7 +22,6 @@ end
         objdir "build/%{cfg.buildcfg}/%{prj.name}"
 
         files { "tests/**.cpp" }
-        links { "mossCore" }
         includedirs {
             "include",
             "tests/include"

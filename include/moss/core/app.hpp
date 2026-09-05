@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "moss/core/key.hpp"
 #include <moss/meta/logs.hpp>
 #include <moss/core/context.hpp>
 #include <moss/core/mirror.hpp>
@@ -20,11 +21,55 @@ namespace moss {
 
 class App {
 public:
-    static App& instance();
-    App& init();
-    App& build();
-    App& run();
-    App& exit();
+    App& instance() {
+        static App app;
+        return app;
+    }
+
+    App& init() {
+        spdlog::set_pattern("[MOSS] [%s] [%!] [%#]: %v");
+        spdlog::set_level(spdlog::level::debug);
+
+        return *this;
+    }
+
+    App& build() {
+        Key<key::WRITE> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        for (auto& ctx : m_contexts) {
+            ctx->build(key);
+        }
+
+        return *this;
+    }
+
+    App& run() {
+        Key<key::READ> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        while (!m_quit) {
+            for (auto& ctx : m_contexts) {
+                ctx->tick(key);
+            }
+        }
+
+        return *this;
+    }
+
+    App& exit() {
+        Key<key::WRITE> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        for (auto& ctx : m_contexts) {
+            ctx->exit(key);
+        }
+
+        return *this;
+    }
 
     template<typename Ctx>
     requires(std::is_base_of_v<Context, Ctx>)
