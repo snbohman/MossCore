@@ -52,9 +52,6 @@ public:
         );
 
         auto eView = m_view.view(doClean);
-        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) == 0,
-            "View size is zero. Undefined behaviour is expected"
-        );
 
         Atlas<Wth...> atlas;
         atlas.reserve(std::distance(eView.begin(), eView.end()));
@@ -114,23 +111,17 @@ public:
     static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
     static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
 
-    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; }
-    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; }
-    void apply(entt::registry* registry) { m_registry = registry; }
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
     void clean() { m_registry = nullptr; }
 
     [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
         M_ERROR_IFF(m_registry == nullptr,
             "Registry is null. Note that apply must be called before any get method"
         );
-        M_ERROR_IFF(view.size() == 0,
-            "View size is zero. Undefined behaviour is expected"
-        );
 
         auto eView = m_view.view(doClean);
-        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) == 0,
-            "Intersection view size is zero. Undefined behaviour is expected"
-        );
 
         Atlas<Wth...> atlas;
         atlas.reserve(view.size());

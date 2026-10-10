@@ -59,6 +59,10 @@ public:
     }
 
 private:
+    // Intended for friended classes that are trusted
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
     entt::registry* m_registry = nullptr;
 };
 
@@ -89,6 +93,9 @@ public:
     }
 
 private:
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
     entt::registry* m_registry = nullptr;
 };
 
@@ -118,6 +125,9 @@ public:
     }
 
 private:
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
     entt::registry* m_registry = nullptr;
 };
 
