@@ -1,6 +1,7 @@
 /*
  * @file    commands/query.hpp
- * @brief   Defines query structures for retrieving components from entity views.
+ * @brief   Defines query structures for retrieving components from entity
+ * views.
  *
  * Queries allow efficient retrieval of component data from a specified entity
  * view. The retrieved components are stored either in an `Atlas` or a `Pool`.
@@ -9,7 +10,8 @@
  *     entities within the view.
  * -   `Pool`:   A container intended for storing components from a single
  *     entity. Using a `Pool` with a view containing multiple entities may
- *     lead to undefined behavior, and a warning is issued.
+ *     lead to undefined behavior, and a warning is issued. Part of atlas
+ * output.
  *
  * Two types of queries are provided:
  *
@@ -18,8 +20,9 @@
  *
  * 2.  **DynamicQuery:** A runtime query that operates on a `DynamicView`.
  *     This provides flexibility but sacrifices compile-time safety.
-*/
+ */
 
+#include "moss/meta/libs.hpp"
 #include <moss/meta/logs.hpp>
 #include <moss/core/key.hpp>
 #include <moss/core/context.hpp>
@@ -63,26 +66,6 @@ public:
         return std::move(atlas);
     }
 
-    [[nodiscard]] Pool<Wth...> pool(bool doClean = false) {
-        M_ERROR_IFF(m_registry == nullptr,
-            "Registry is null. Note that apply must be called before any get method"
-        );
-
-        auto eView = m_view.view(doClean);
-        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) > 1,
-            "View size is greater than one. Consider using \
-            an Atlas instead. Undefined behaviour is \
-            otherwise expected"
-        );
-        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) == 0,
-            "View size is zero. Undefined behaviour is expected"
-        );
-
-        Pool<Wth...> pool = { m_registry->get<Wth>(*eView.begin())... };
-        if (doClean) clean();
-        return std::move(pool);
-    }
-
 private:
     View<Include<VwInc...>, Exclude<VwEx...>> m_view;
     entt::registry* m_registry;
@@ -112,15 +95,14 @@ public:
     void clean() { q.clean(); }
     
     [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
-    [[nodiscard]] Pool<Wth...> pool(bool doClean = false) { return std::move(q.pool(doClean)); }
 
 private:
     Query<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
 };
 
-template<typename... Wth>
+template<typename... Wth, typename... VwInc, typename... VwEx>
 requires(sizeof...(Wth) > 0)
-class DynamicQuery<With<Wth...>> {
+class DynamicQuery<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
 public:
     DynamicQuery() = default;
     DynamicQuery(const Key<key::READ>& key) { apply(key); }
@@ -145,9 +127,15 @@ public:
             "View size is zero. Undefined behaviour is expected"
         );
 
+        auto eView = m_view.view(doClean);
+        M_ERROR_IFF(std::distance(eView.begin(), eView.end()) == 0,
+            "Intersection view size is zero. Undefined behaviour is expected"
+        );
+
         Atlas<Wth...> atlas;
         atlas.reserve(view.size());
         for (const auto& entity : view) {
+            if (!eView.contains(entity)) continue;
             atlas.push_back( { m_registry->get<Wth>(entity)... } );
         }
 
@@ -155,26 +143,65 @@ public:
         return std::move(atlas);
     }
 
-    [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = false) {
-        M_ERROR_IFF(m_registry == nullptr,
-            "Registry is null. Note that apply must be called before any get method"
-        );
-        M_ERROR_IFF(view.size() > 1,
-            "View size is greater than one. Consider using \
-            an Atlas instead. Undefined behaviour is \
-            otherwise expected"
-        );
-        M_ERROR_IFF(view.size() == 0,
-            "View size is zero. Undefined behaviour is expected"
-        );
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
+    entt::registry* m_registry;
+};
 
-        Pool<Wth...> pool = { m_registry->get<Wth>(*view.begin())... };
-        if (doClean) clean();
-        return std::move(pool);
+// Wrapper around DynamicQuery without any Exclude Argument
+template<typename... Wth, typename... VwInc>
+requires(sizeof...(Wth) > 0)
+class DynamicQuery<With<Wth...>, View< Include<VwInc...>> > {
+public:
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
+    DynamicQuery(entt::registry* registry) { q.apply(registry); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void apply(entt::registry* registry) { q.apply(registry); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+        return std::move(q.atlas(view, doClean));
     }
 
 private:
-    entt::registry* m_registry;
+    DynamicQuery<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
+};
+
+// Wrapper around DynamicQuery without any View (inc and exc) argument.
+template<typename... Wth>
+requires(sizeof...(Wth) > 0)
+class DynamicQuery<With<Wth...>, void> {
+public:
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
+    DynamicQuery(entt::registry* registry) { q.apply(registry); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void apply(entt::registry* registry) { q.apply(registry); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+        return std::move(q.atlas(view, doClean));
+    }
+
+private:
+    DynamicQuery<With<Wth...>, View<Include<>, Exclude<>>> q;
 };
 
 } // moss::commands

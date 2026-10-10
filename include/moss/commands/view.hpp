@@ -92,4 +92,33 @@ private:
     entt::registry* m_registry = nullptr;
 };
 
-}
+template<>
+class View<void, void> {
+public:
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+    View(entt::registry* registry) { apply(registry); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+    static View init(entt::registry* registry) { return View(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void apply(entt::registry* registry) { m_registry = registry; } 
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto v = m_registry->view<Entity>(); // Trick to get all entities in reg
+        if (doClean) clean();
+        return std::move(v);
+    }
+
+private:
+    entt::registry* m_registry = nullptr;
+};
+
+} // namespace commands

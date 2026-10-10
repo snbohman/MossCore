@@ -14,7 +14,7 @@ TEST_CASE("View") {
             Include<tst::CompA>
         >::init(&reg).view();
 
-        CHECK(view->size() == 3);
+        CHECK(view.size() == 3);
         for (auto entity : view) {
             std::string_view uId = reg.get<tst::CompA>(entity).uId;
             tst::uIdCheck(uId, {"EntA", "EntD", "EntF"});

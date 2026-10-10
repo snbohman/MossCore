@@ -48,13 +48,13 @@ using Atlas = std::vector<Pool<C...>>;
 ////////////////////////
 namespace commands {
 
-template<typename Include, typename Exclude = void>
+template<typename Include = void, typename Exclude = void>
 class View;
 
 template<typename With, typename View>
 class Query;
 
-template<typename With>
+template<typename With, typename View = void>
 class DynamicQuery;
 
 template<u32 N>
