@@ -91,7 +91,7 @@ public:
     template<typename... T>
     requires(std::is_base_of_v<System, T> && ...)
     Mirror& connect() {
-        m_contex->m_systems.push_back(std::move(std::make_unique<T>() ...));
+        (m_contex->m_systems.push_back(std::make_unique<T>()), ...);
         return *this;
     }
 

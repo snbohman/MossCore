@@ -78,7 +78,7 @@ public:
         atlas.reserve(view.size());
         for (auto& entity : view) {
             atlas.push_back(Pool<Wth...>(
-                m_registry->emplace<Wth>(*view.begin(), args...)...
+                m_registry->emplace<Wth>(entity, args...)...
             ));
         }
 
@@ -146,7 +146,7 @@ public:
         atlas.reserve(view.size());
         for (auto& entity : view) {
             atlas.push_back(Pool<Wth...>(
-                m_registry->emplace<Wth>(*view.begin(), args...)...
+                m_registry->emplace<Wth>(entity, args...)...
             ));
         }
 

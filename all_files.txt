@@ -1,0 +1,1219 @@
+============ [[commands/attach.hpp]]
+/**
+ * @file commands/attach.hpp
+ * @brief Attach command specification
+ *
+ * Simple attach component command used
+ * by systems.
+ *
+ * Divided into two groups, Attach and dynamic
+ * attach. Attach attaches components onto
+ * the tempalted given view. Dynamic attach
+ * attaches components, altough templated
+ * to a DynamicView.
+ */
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/core/key.hpp>
+#include <moss/commands/view.hpp>
+#include <moss/commands/primitives.hpp>
+
+
+namespace moss::commands {
+
+template<typename... Wth, typename... VwInc, typename... VwEx>
+requires(sizeof...(Wth) > 0)
+class Attach<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>> {
+public:
+    Attach() = default;
+    Attach(const Key<key::READ>& key) { apply(key); }
+    Attach(entt::registry* registry) { apply(registry); }
+
+    static Attach init() { return Attach(); }
+    static Attach init(const Key<key::READ>& key) { return Attach(key); }
+    static Attach init(entt::registry* registry) { return Attach(registry); }
+
+    void apply(Key<key::READ> key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
+    void clean() { m_registry = nullptr; m_view.clean(); }
+
+    template<typename... Args>
+    [[nodiscard]] Pool<Wth...> pool(bool doClean = false, Args&&... args) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto view = m_view.view(doClean);
+        M_ERROR_IFF(view.size() > 1,
+            "View size is greater than one. Consider using \
+            an Atlas instead. Undefined behaviour is \
+            otherwise expected"
+        );
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+        Pool<Wth...> p(
+            m_registry->emplace<Wth>(*view.begin(), args...)...
+        );
+
+        if (doClean) clean();
+        return std::move(p);
+    }
+
+    template<typename... Args>
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false, Args&&... args) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto view = m_view.view(doClean);
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+        Atlas<Wth...> atlas;
+        atlas.reserve(view.size());
+        for (auto& entity : view) {
+            atlas.push_back(Pool<Wth...>(
+                m_registry->emplace<Wth>(*view.begin(), args...)...
+            ));
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
+    entt::registry* m_registry;
+};
+
+template<typename... Wth>
+requires(sizeof...(Wth) > 0)
+class DynamicAttach<With<Wth...>> {
+public:
+    DynamicAttach() = default;
+    DynamicAttach(const Key<key::READ>& key) { apply(key); }
+    DynamicAttach(const Key<key::WRITE>& key) { apply(key); }
+    DynamicAttach(entt::registry* registry) { apply(registry); }
+
+    static DynamicAttach init() { return DynamicAttach(); }
+    static DynamicAttach init(const Key<key::READ>& key) { return DynamicAttach(key); }
+    static DynamicAttach init(const Key<key::WRITE>& key) { return DynamicAttach(key); }
+    static DynamicAttach init(entt::registry* registry) { return DynamicAttach(registry); }
+
+    void apply(Key<key::READ> key) { m_registry = key.m_registry; }
+    void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
+    void apply(entt::registry* registry) { m_registry = registry; }
+    void clean() { m_registry = nullptr; }
+
+    template<typename... Args>
+    [[nodiscard]] Pool<Wth...> pool(const DynamicView& view, bool doClean = false, Args&&... args) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+        M_ERROR_IF(view.size() > 1,
+            "View size ({}) is greater than one. Consider using \
+            an Atlas instead. Undefined behaviour is \
+            otherwise expected"
+        , view.size());
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+
+        Pool<Wth...> p(
+            m_registry->emplace<Wth>(*view.begin(), args...)...
+        );
+
+        if (doClean) clean();
+        return std::move(p);
+    }
+
+    template<typename... Args>
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false, Args&&... args) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+        M_ERROR_IFF(view.size() == 0,
+            "View size is zero. Undefined behaviour is expected"
+        );
+
+        Atlas<Wth...> atlas;
+        atlas.reserve(view.size());
+        for (auto& entity : view) {
+            atlas.push_back(Pool<Wth...>(
+                m_registry->emplace<Wth>(*view.begin(), args...)...
+            ));
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    entt::registry* m_registry;
+};
+
+}
+
+
+============ [[commands/commands.hpp]]
+#pragma once
+
+#include <moss/commands/view.hpp>
+#include <moss/commands/query.hpp>
+#include <moss/commands/create.hpp>
+#include <moss/commands/attach.hpp>
+#include <moss/commands/quit.hpp>
+
+
+============ [[commands/create.hpp]]
+/**
+ * @file commands/create.hpp
+ * @brief Create command specification
+ *
+ * Simple create command used by systems.
+ *
+ */
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/meta/types.hpp>
+#include <moss/core/key.hpp>
+#include <moss/commands/primitives.hpp>
+
+namespace moss::commands {
+
+template<u32 N>
+requires(N > 0)
+class Create {
+public:
+    Create() = default;
+    Create(const Key<key::READ>& key) { apply(key); }
+    Create(const Key<key::WRITE>& key) { apply(key); }
+
+    static Create init() { return Create(); }
+    static Create init(const Key<key::READ>& key) { return Create(key); }
+    static Create init(const Key<key::WRITE>& key) { return Create(key); }
+
+    void apply(Key<key::READ> key) { m_registry = key.m_registry; }
+    void apply(Key<key::WRITE> key) { m_registry = key.m_registry; }
+    void reg(entt::registry* reg) { m_registry = reg; }
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] DynamicView create(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+ 
+        DynamicView v;
+        for (u32 i = 0; i < N; i++) {
+            v.push_back(m_registry->create());
+        }
+
+        return std::move(v);
+    }
+
+private:
+    entt::registry* m_registry;
+};
+
+} // moss::commands
+
+
+============ [[commands/primitives.hpp]]
+/**
+ * @file    commands/primitives.hpp
+ * @brief   Seperation of declerations of commands.
+ *
+ * Seperation used for importing purposes.
+ * Includes all declarations of the base 
+ * types and structs, but no further
+ * definitions.
+*/
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/types.hpp>
+#include <moss/ecs/component.hpp>
+
+
+namespace moss {
+
+////////////////////
+//// -- Base -- ////
+////////////////////
+using Entity = entt::entity;
+
+template<typename... Ts>
+struct Include { };
+
+template<typename... Ts>
+struct Exclude { };
+
+template<typename... Ts>
+struct With { };
+
+
+///////////////////////
+//// -- Outputs -- ////
+///////////////////////
+using DynamicView = std::vector<Entity>;
+
+template<typename... C>
+using Pool = std::tuple<C&...>;
+
+template<typename... C>
+using Atlas = std::vector<Pool<C...>>;
+
+////////////////////////
+//// -- Commands -- ////
+////////////////////////
+namespace commands {
+
+template<typename Include = void, typename Exclude = void>
+class View;
+
+template<typename With, typename View>
+class Query;
+
+template<typename With, typename View = void>
+class DynamicQuery;
+
+template<u32 N>
+requires(N > 0)
+class Create;
+
+template<typename Components, typename View>
+class Attach;
+
+template<typename With>
+class DynamicAttach;
+
+class Quit;
+
+}
+
+}
+
+
+============ [[commands/query.hpp]]
+/*
+ * @file    commands/query.hpp
+ * @brief   Defines query structures for retrieving components from entity
+ * views.
+ *
+ * Queries allow efficient retrieval of component data from a specified entity
+ * view. The retrieved components are stored either in an `Atlas` or a `Pool`.
+ *
+ * -   `Atlas`:  A container suitable for storing components from multiple
+ *     entities within the view.
+ * -   `Pool`:   A container intended for storing components from a single
+ *     entity. Using a `Pool` with a view containing multiple entities may
+ *     lead to undefined behavior, and a warning is issued. Part of atlas
+ * output.
+ *
+ * Two types of queries are provided:
+ *
+ * 1.  **Query:** A compile-time query that operates on a statically defined
+ *     `View`.  This offers compile-time safety and optimization opportunities.
+ *
+ * 2.  **DynamicQuery:** A runtime query that operates on a `DynamicView`.
+ *     This provides flexibility but sacrifices compile-time safety.
+ */
+
+#include "moss/meta/libs.hpp"
+#include <moss/meta/logs.hpp>
+#include <moss/core/key.hpp>
+#include <moss/core/context.hpp>
+#include <moss/commands/primitives.hpp>
+
+namespace moss::commands {
+
+template<typename... Wth, typename... VwInc, typename... VwEx>
+requires(sizeof...(Wth) > 0)
+class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+public:
+    Query() = default;
+    Query(const Key<key::READ>& key) { apply(key); }
+    Query(entt::registry* registry) { apply(registry); }
+
+    static Query init() { return Query(); }
+    static Query init(const Key<key::READ>& key) { return Query(key); }
+    static Query init(entt::registry* registry) { return Query(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
+    void clean() { m_registry = nullptr; m_view.clean(); }
+
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto eView = m_view.view(doClean);
+
+        Atlas<Wth...> atlas;
+        atlas.reserve(std::distance(eView.begin(), eView.end()));
+        for (entt::entity entity : eView) {
+            atlas.push_back( { m_registry->get<Wth>(entity)... } );
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
+    entt::registry* m_registry;
+};
+
+
+/**
+ * @brief Wrapper around query without Exclude inside View
+ *
+ * Simple wrapper around the norma query. Has a query object
+ * lying inside and calling that whenever.
+ */
+template<typename... Wth, typename... VwInc>
+requires(sizeof...(Wth) > 0)
+class Query<With<Wth...>, View< Include<VwInc...>> > {
+public:
+    Query() = default;
+    Query(const Key<key::READ>& key) { q.apply(key); }
+    Query(entt::registry* registry) { q.apply(registry); }
+
+    static Query init() { return Query(); }
+    static Query init(const Key<key::READ>& key) { return Query(key); }
+    static Query init(entt::registry* registry) { return Query(registry); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(entt::registry* registry) { q.apply(registry); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
+
+private:
+    Query<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
+};
+
+template<typename... Wth, typename... VwInc, typename... VwEx>
+requires(sizeof...(Wth) > 0)
+class DynamicQuery<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+public:
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { apply(key); }
+    DynamicQuery(entt::registry* registry) { apply(registry); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; m_view.apply(key); }
+    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto eView = m_view.view(doClean);
+
+        Atlas<Wth...> atlas;
+        atlas.reserve(view.size());
+        for (const auto& entity : view) {
+            if (!eView.contains(entity)) continue;
+            atlas.push_back( { m_registry->get<Wth>(entity)... } );
+        }
+
+        if (doClean) clean();
+        return std::move(atlas);
+    }
+
+private:
+    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
+    entt::registry* m_registry;
+};
+
+// Wrapper around DynamicQuery without any Exclude Argument
+template<typename... Wth, typename... VwInc>
+requires(sizeof...(Wth) > 0)
+class DynamicQuery<With<Wth...>, View< Include<VwInc...>> > {
+public:
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
+    DynamicQuery(entt::registry* registry) { q.apply(registry); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void apply(entt::registry* registry) { q.apply(registry); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+        return std::move(q.atlas(view, doClean));
+    }
+
+private:
+    DynamicQuery<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
+};
+
+// Wrapper around DynamicQuery without any View (inc and exc) argument.
+template<typename... Wth>
+requires(sizeof...(Wth) > 0)
+class DynamicQuery<With<Wth...>, void> {
+public:
+    DynamicQuery() = default;
+    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
+    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
+    DynamicQuery(entt::registry* registry) { q.apply(registry); }
+
+    static DynamicQuery init() { return DynamicQuery(); }
+    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
+    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
+
+    void apply(const Key<key::READ>& key) { q.apply(key); }
+    void apply(const Key<key::WRITE>& key) { q.apply(key); }
+    void apply(entt::registry* registry) { q.apply(registry); }
+    void clean() { q.clean(); }
+    
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
+        return std::move(q.atlas(view, doClean));
+    }
+
+private:
+    DynamicQuery<With<Wth...>, View<Include<>, Exclude<>>> q;
+};
+
+} // moss::commands
+
+
+============ [[commands/quit.hpp]]
+/**
+ * @file commands/quit.hpp
+ * @brief Quit command
+ */
+
+#pragma once
+
+#include <moss/core/key.hpp>
+#include <moss/commands/primitives.hpp>
+
+
+namespace moss::commands {
+
+class Quit {
+public:
+    Quit() = default;
+    Quit(const Key<key::READ>& key) { apply(key); }
+    Quit(const Key<key::WRITE>& key) { apply(key); }
+
+    static Quit init() { return Quit(); }
+    static Quit init(const Key<key::READ>& key) { return Quit(key); }
+    static Quit init(const Key<key::WRITE>& key) { return Quit(key); }
+
+    void apply(const Key<key::READ>& key) { m_quit = key.m_quit; } 
+    void apply(const Key<key::WRITE>& key) { m_quit = key.m_quit; } 
+    void clean() { m_quit = nullptr; }
+
+    void quit(bool doClean = false) {
+        M_ERROR_IFF(m_quit == nullptr,
+            "Quit pointer is null. Not that apply must be called before any get method"
+        );
+
+        *m_quit = true;
+        if (doClean) clean();
+    }
+
+private:
+    bool* m_quit;
+};
+
+};
+
+
+============ [[commands/view.hpp]]
+/*
+ * @file    command/view.hpp
+ * @brief   Defines entity views for ECS operations, both runtime and compile-time.
+ *
+ * An entity view is a container holding a selection of entities based on
+ * specified criteria.  This file defines two types of views:
+ *
+ * 1.  **DynamicView:** A runtime view implemented as a heap-allocated
+ *     `std::vector<entt::entity>`.  It offers flexibility without compile-time
+ *     safety.  Defined in `primitives.hpp` to avoid circular dependencies
+ *     and because it's a simple output type.
+ *
+ * 2.  **View:** A compile-time view that leverages templates to enforce
+ *     inclusion and exclusion criteria at compile time. While the ECS registry
+ *     access is inherently runtime, the view's structure and filtering logic
+ *     are determined at compile time, providing increased safety and
+ *     performance through static analysis.
+*/
+
+
+#pragma once
+
+#include <moss/core/key.hpp>
+#include <moss/commands/primitives.hpp>
+
+
+namespace moss::commands {
+
+template<typename... Inc, typename... Ex>
+requires(sizeof...(Inc) > 0)
+class View<Include<Inc...>, Exclude<Ex...>> {
+public:
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+    View(entt::registry* registry) { apply(registry); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+    static View init(entt::registry* registry) { return View(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void apply(entt::registry* registry) { m_registry = registry; }
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        if constexpr (sizeof...(Ex) == 0) {
+            auto v = m_registry->view<Inc...>();
+            if (doClean) clean();
+            return std::move(v);
+        } else {
+            auto v = m_registry->view<Inc...>(entt::exclude<Ex...>);
+            if (doClean) clean();
+            return std::move(v);
+        }
+    }
+
+private:
+    // Intended for friended classes that are trusted
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
+    entt::registry* m_registry = nullptr;
+};
+
+template<typename... Inc>
+requires(sizeof...(Inc) > 0)
+class View<Include<Inc...>, void> {
+public:
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+    View(entt::registry* registry) { apply(registry); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+    static View init(entt::registry* registry) { return View(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void apply(entt::registry* registry) { m_registry = registry; } 
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto v = m_registry->view<Inc...>();
+        if (doClean) clean();
+        return std::move(v);
+    }
+
+private:
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
+    entt::registry* m_registry = nullptr;
+};
+
+template<>
+class View<void, void> {
+public:
+    View() = default;
+    View(const Key<key::READ>& key) { apply(key); }
+    View(entt::registry* registry) { apply(registry); }
+
+    static View init() { return View(); }
+    static View init(const Key<key::READ>& key) { return View(key); }
+    static View init(entt::registry* registry) { return View(registry); }
+
+    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; } 
+    void apply(entt::registry* registry) { m_registry = registry; } 
+    void clean() { m_registry = nullptr; }
+
+    [[nodiscard]] auto view(bool doClean = false) {
+        M_ERROR_IFF(m_registry == nullptr,
+            "Registry is null. Note that apply must be called before any get method"
+        );
+
+        auto v = m_registry->view<Entity>(); // Trick to get all entities in reg
+        if (doClean) clean();
+        return std::move(v);
+    }
+
+private:
+    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; } 
+    template<typename Wth, typename Vw> friend class DynamicQuery;
+
+    entt::registry* m_registry = nullptr;
+};
+
+} // namespace commands
+
+
+============ [[core/app.hpp]]
+/**
+ * @file    core/app.hpp
+ * @brief   Main application class responsible for lifecycle management.
+ *
+ * The `App` class orchestrates the overall application flow, managing
+ * the ECS registry and systems. It provides methods for initialization,
+ * building, running, and cleaning up. The `App` itself does not directly
+ * interact with entities or systems; instead, it relies on the `Context` 
+ * class to manage them, with the `mount` method to add them.
+ */
+
+#pragma once
+
+#include <moss/meta/logs.hpp>
+#include <moss/core/context.hpp>
+#include <moss/core/mirror.hpp>
+
+
+namespace moss {
+
+class App {
+public:
+    App& instance() {
+        static App app;
+        return app;
+    }
+
+    App& init() {
+        spdlog::set_pattern("[MOSS] [%s] [%!] [%#]: %v");
+        spdlog::set_level(spdlog::level::debug);
+
+        return *this;
+    }
+
+    App& build() {
+        Key<key::WRITE> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        for (auto& ctx : m_contexts) {
+            ctx->build(key);
+        }
+
+        return *this;
+    }
+
+    App& run() {
+        Key<key::READ> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        while (!m_quit) {
+            for (auto& ctx : m_contexts) {
+                ctx->tick(key);
+            }
+        }
+
+        return *this;
+    }
+
+    App& exit() {
+        Key<key::WRITE> key;
+        key.m_registry = &m_registry;
+        key.m_quit = &m_quit;
+
+        for (auto& ctx : m_contexts) {
+            ctx->exit(key);
+        }
+
+        return *this;
+    }
+
+    template<typename Ctx>
+    requires(std::is_base_of_v<Context, Ctx>)
+    App& mount() {
+        Mirror mirror;
+        mirror.m_registry = &m_registry;
+
+        auto ctx = std::make_unique<Ctx>();
+        mirror.m_contex = ctx.get();
+        ctx->init(mirror);
+
+        m_contexts.push_back(std::move(ctx));
+        return *this;
+    }
+
+private:
+    std::vector<std::unique_ptr<Context>> m_contexts;
+    entt::registry m_registry;
+    bool m_quit = false;
+};
+
+}
+
+
+============ [[core/context.hpp]]
+/**
+ * @file    core/context.hpp
+ * @brief   Defines the `Context` class that groups systems and manages entities.
+ *
+ * The `Context` class represents a collection of entities and systems.
+ * It provides methods for initializing, building, ticking, and exiting
+ * the context. Each context is a specialized group of systems that operates
+ * on a set of entities. 
+ */
+
+#pragma once
+
+#include <moss/ecs/system.hpp>
+#include <moss/commands/primitives.hpp>
+
+namespace moss {
+
+class Mirror;
+
+/**
+ * @class Context
+ * @brief Base class for defining grouped logic (systems + entities).
+ *
+ * Contexts are created by the user and mounted into the App. They define a
+ * self-contained unit of game/application logic. The `init()` method is the only
+ * function intended to be overridden, where entity creation and system attachment
+ * is performed via the Mirror class.
+ *
+ * The internal lifecycle (`build`, `tick`, `exit`) is managed by the engine and
+ * *can't* be overridden. These methods apply to all systems registered during `init()`.
+ */
+class Context {
+public:
+    virtual ~Context() = default;
+
+    virtual void init(Mirror& mirror) { };
+    void build(const Key<key::WRITE>& key) {
+        for (auto& s : m_systems) {
+            s->build();
+            s->build(key);
+            s->build(key, m_view);
+        }
+    }
+
+    void tick(const Key<key::READ>& key) {
+        for (auto& s : m_systems) {
+            s->tick();
+            s->tick(key);
+            s->tick(key, m_view);
+        }
+    }
+
+    void exit(const Key<key::WRITE>& key) {
+        for (auto& s : m_systems) {
+            s->exit();
+            s->exit(key);
+            s->exit(key, m_view);
+        }
+    }
+
+private:
+    friend class Mirror;
+    friend class App;
+
+    DynamicView m_view;
+    std::vector<std::unique_ptr<System>> m_systems;
+};
+
+}
+
+
+============ [[core/key.hpp]]
+/**
+ * @file    core/key.hpp
+ * @brief   Defines the `Key` class and permission system for ECS commands.
+ *
+ * The `Key` class represents a permission system for commands in the ECS.
+ * It ensures that systems and commands only read or write to components 
+ * when permitted. The permissions are defined through the `Permissions` 
+ * enum and are used to control access to the ECS registry.
+ */
+
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/commands/primitives.hpp>
+
+namespace moss {
+
+namespace key {
+
+    /**
+     * @enum Permissions
+     * @brief Defines permissions for command access to components.
+     *
+     * The `Permissions` enum provides two levels of access: `READ` and `WRITE`.
+     * These control the ability to read or modify components in the ECS registry.
+     */
+    enum Permissions {
+        READ,
+        WRITE
+    };
+
+}
+
+/**
+ * @class Key
+ * @brief Provides access control for ECS commands based on permissions.
+ *
+ * The `Key` class encapsulates the permissions for reading or writing to
+ * components in the ECS registry. It restricts access based on the 
+ * defined permissions (`READ` or `WRITE`). It is used by commands and
+ * systems.
+ */
+template<key::Permissions P>
+class Key {
+public:
+    Key<P>(const Key<P>&) = delete;
+    Key<P>& operator=(const Key<P>&) = delete;
+    Key<P>(Key<P>&&) = delete;
+    Key<P>& operator=(Key<P>&&) = delete;
+ 
+private:
+    friend class App;
+    template<typename Wth, typename Vw> friend class commands::Query;
+    template<typename Wth, typename Vw> friend class commands::DynamicQuery;
+    template<typename Inc, typename Ex> friend class commands::View;
+    template<typename Cmp> friend class commands::DynamicAttach;
+    template<typename Cmp, typename View> friend class commands::Attach;
+    template<u32 N> requires(N > 0) friend class commands::Create;
+    friend class commands::Quit;
+
+    Key() = default;
+    ~Key() = default;
+
+    entt::registry* m_registry;
+    bool* m_quit;
+};
+
+}
+
+
+============ [[core/mirror.hpp]]
+/**
+ * @file    core/mirror.hpp
+ * @brief   Provides the Mirror class for managing entities and systems.
+ *
+ * The `Mirror` class is responsible for creating and attaching entities and systems
+ * to the `Context`. It also provides a means to interact with the ECS registry
+ * during the `init()` phase of the `Context` lifecycle. It serves as the primary 
+ * interface for modifying and managing entities and systems.
+ */
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/core/context.hpp>
+#include <moss/commands/primitives.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/ecs/ecs.hpp>
+
+
+namespace moss {
+
+/**
+ * @class Mirror
+ * @brief Utility class for managing entities and systems in a Context.
+ *
+ * The `Mirror` class is responsible for creating and managing entities and attaching
+ * components or systems to those entities within the scope of a `Context`.
+ * It provides a fluent interface for adding entities, components, and systems
+ * to a `Context`. The `create()`, `attach()`, and `connect()` methods offer
+ * the necessary abstractions for entity and system management.
+ *
+ * The `Mirror` is used internally by `Context` to register components and systems
+ * and should not be used directly by users outside of the `Context`'s `init()` phase.
+
+ * The mirror could be thought of as a mirror for the contex, which the user use inside
+ * the build contex method.
+ */
+class Mirror {
+public:
+    /**
+     * @brief Creates a set of new entities.
+     *
+     * This function creates `count` number of new entities and adds them to the
+     * `Mirror`'s entity view. These entities are then available for attaching components
+     * or systems.
+     *
+     * @param count Number of entities to create (defaults to 1).
+     * @return Reference to this Mirror instance.
+     */
+    Mirror& create(u32 count = 1) {
+        m_view.clear();
+        m_view.reserve(count);
+
+        for (u32 i = 0; i < count; i++) {
+            entt::entity e = m_registry->create();
+            m_view.push_back(e); m_contex->m_view.push_back(e);
+        }
+
+        return *this;
+    }
+
+    /**
+     * @brief Attaches components to entities in the Mirror's view.
+     *
+     * This method attaches one or more components to each of the entities in the
+     * `m_view`. Components must inherit from `moss::Component`. The components are 
+     * initialized when attached.
+     *
+     * @tparam T Components to attach to each entity.
+     * @return Reference to this Mirror instance.
+     */
+    template<typename... T, typename... Args>
+    requires(std::is_base_of_v<Component, T> && ...)
+    Mirror& attach(Args&&... args) {
+        for (entt::entity entity : m_view) {
+            (m_registry->emplace<T>(entity, args...), ...);
+        }
+
+        return *this;
+    }
+
+    /**
+     * @brief Connects systems to the Context.
+     *
+     * This method registers one or more systems with the `Context`. Systems must inherit
+     * from `moss::System`. The systems are added to the `Context`'s system view.
+     *
+     * @tparam T Systems to be connected to the Context.
+     * @return Reference to this Mirror instance.
+     */
+    template<typename... T>
+    requires(std::is_base_of_v<System, T> && ...)
+    Mirror& connect() {
+        m_contex->m_systems.push_back(std::move(std::make_unique<T>() ...));
+        return *this;
+    }
+
+private:
+    friend class App;
+    Mirror() { }
+
+    Context* m_contex;
+    DynamicView m_view;
+    entt::registry* m_registry;
+};
+
+}
+
+
+============ [[ecs/component.hpp]]
+#pragma once
+
+
+namespace moss {
+
+struct Component {
+public:
+    virtual ~Component() = default;
+};
+
+}
+
+
+============ [[ecs/ecs.hpp]]
+#pragma once
+
+
+#include <moss/ecs/component.hpp>
+#include <moss/ecs/system.hpp>
+
+
+============ [[ecs/system.hpp]]
+/**
+ * @file    core/system.hpp
+ * @brief   Defines the base `System` class for ECS systems.
+ *
+ * The `System` class serves as the base class for all systems in the ECS
+ * architecture. It provides virtual methods for system lifecycle management,
+ * including `init`, `build`, `tick`, and `exit`. Derived classes can override
+ * these methods to implement specific system logic.
+ *
+ * The class supports permission-controlled access to the ECS registry via
+ * the `Key` class, allowing fine-grained control over read and write access
+ * to entities.
+ *
+ * Systems can interact with entities using a `DynamicView`, offering flexibility
+ * in which entities a system affects.
+ */
+
+#pragma once
+
+#include <moss/core/key.hpp>
+#include <moss/commands/primitives.hpp>
+
+namespace moss {
+
+/**
+ * @class System
+ * @brief Base class for ECS systems.
+ * 
+ * The `System` class is the fundamental base class for systems within the ECS
+ * framework. It provides default methods for `init`, `build`, `tick`, and `exit`,
+ * which can be overridden by derived classes to implement system behavior.
+ * 
+ * The class also manages access permissions to the ECS registry through the `Key`
+ * class, supporting both read and write access.
+ */
+class System {
+public:
+    System() { init(); }
+    virtual ~System() = default;
+
+    virtual void init()  { }
+    virtual void build() { }
+    virtual void tick()  { }
+    virtual void exit()  { }
+
+    virtual void build(const Key<key::WRITE>& key) { }
+    virtual void tick(const Key<key::READ>& key)  { }
+    virtual void exit(const Key<key::WRITE>& key)  { }
+
+    virtual void build(const Key<key::WRITE>& key, const DynamicView& entities) { }
+    virtual void tick(const Key<key::READ>& key, const DynamicView& entities)  { }
+    virtual void exit(const Key<key::WRITE>& key, const DynamicView& entities)  { }
+};
+
+}
+
+
+============ [[meta/aliases.hpp]]
+#pragma once
+
+#include <moss/commands/primitives.hpp>
+
+
+namespace moss {
+
+namespace cmd = commands;
+
+}
+
+
+============ [[meta/libs.hpp]]
+#pragma once
+
+#include <entt/entt.hpp>
+#include <spdlog/spdlog.h>
+
+
+============ [[meta/logs.hpp]]
+/**
+ * @file    meta/defines.hpp
+ * @brief   Defines log macros
+ *
+ * Defines spdlog log macros and static assert
+ * macros.
+ */
+
+
+#pragma once
+
+#include <moss/meta/libs.hpp>
+
+
+#define M_SA(condition, message) static_assert(condition, "[MOSS] " message)
+
+#define M_LOG(level, message, ...) spdlog::log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, message, ##__VA_ARGS__)
+
+#define M_ERROR(message, ...) M_LOG(spdlog::level::err, message, ##__VA_ARGS__)
+#define M_WARN(message, ...)  M_LOG(spdlog::level::warn, message, ##__VA_ARGS__)
+#define M_INFO(message, ...)  M_LOG(spdlog::level::info, message, ##__VA_ARGS__)
+#define M_DEB(message, ...)   M_LOG(spdlog::level::debug, message, ##__VA_ARGS__)
+
+#define M_ERRORF(message) M_ERROR(message)
+#define M_WARNF(message)  M_WARN(message)
+#define M_INFOF(message)  M_INFO(message)
+#define M_DEBF(message)   M_DEB(message)
+
+#define M_ERROR_IF(cond, message, ...) do { if (cond) M_ERROR(message, ##__VA_ARGS__); } while (0)
+#define M_WARN_IF(cond, message, ...) do { if (cond) M_WARN(message, ##__VA_ARGS__); } while (0)
+#define M_INFO_IF(cond, message, ...) do { if (cond) M_INFO(message, ##__VA_ARGS__); } while (0)
+#define M_DEB_IF(cond, message, ...) do { if (cond) M_DEB(message, ##__VA_ARGS__); } while (0)
+
+#define M_ERROR_IFF(cond, message) do { if (cond) M_ERRORF(message); } while (0)
+#define M_WARN_IFF(cond, message) do { if (cond) M_WARNF(message); } while (0)
+#define M_INFO_IFF(cond, message) do { if (cond) M_INFOF(message); } while (0)
+#define M_DEB_IFF(cond, message) do { if (cond) M_DEBF(message); } while (0)
+
+
+============ [[meta/types.hpp]]
+#pragma once
+
+#include <cstdint>
+
+
+using u8  = std::uint8_t;
+using u16 = std::uint16_t;
+using u32 = std::uint32_t;
+using u64 = std::uint64_t;
+
+using i8  = std::int8_t;
+using i16 = std::int16_t;
+using i32 = std::int32_t;
+using i64 = std::int64_t;
+
+using f32 = float;
+using f64 = double;
+
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
+
+============ [[moss.hpp]]
+#pragma once
+
+#include <moss/meta/libs.hpp>
+#include <moss/meta/logs.hpp>
+#include <moss/core/app.hpp>
+#include <moss/core/context.hpp>
+#include <moss/core/mirror.hpp>
+#include <moss/core/key.hpp>
+#include <moss/ecs/component.hpp>
+#include <moss/ecs/ecs.hpp>
+#include <moss/commands/commands.hpp>
+
+#include <moss/meta/aliases.hpp>
+
+

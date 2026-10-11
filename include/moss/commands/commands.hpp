@@ -5,3 +5,4 @@
 #include <moss/commands/create.hpp>
 #include <moss/commands/attach.hpp>
 #include <moss/commands/quit.hpp>
+#include <moss/commands/resource.hpp>

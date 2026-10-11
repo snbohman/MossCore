@@ -56,6 +56,7 @@ private:
     template<typename Wth, typename Vw> friend class commands::DynamicQuery;
     template<typename Inc, typename Ex> friend class commands::View;
     template<typename Cmp> friend class commands::DynamicAttach;
+    template<typename T> friend class commands::Resource;
     template<typename Cmp, typename View> friend class commands::Attach;
     template<u32 N> requires(N > 0) friend class commands::Create;
     friend class commands::Quit;
