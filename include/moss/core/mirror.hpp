@@ -69,12 +69,11 @@ public:
      * @tparam T Components to attach to each entity.
      * @return Reference to this Mirror instance.
      */
-    template<typename... T, typename... Args>
-    requires(std::is_base_of_v<Component, T> && ...)
-    Mirror& attach(Args&&... args) {
-        for (entt::entity entity : m_view) {
-            (m_registry->emplace<T>(entity, args...), ...);
-        }
+    template<typename T>
+    requires(std::is_base_of_v<Component, T>)
+    Mirror& attach(const T& value) {
+        for (entt::entity entity : m_view)
+            m_registry->emplace<T>(entity, value);   // copy of the aggregate
 
         return *this;
     }

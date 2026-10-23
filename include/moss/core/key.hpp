@@ -45,10 +45,10 @@ namespace key {
 template<key::Permissions P>
 class Key {
 public:
-    Key<P>(const Key<P>&) = delete;
-    Key<P>& operator=(const Key<P>&) = delete;
-    Key<P>(Key<P>&&) = delete;
-    Key<P>& operator=(Key<P>&&) = delete;
+    Key(const Key<P>&) = delete;
+    Key& operator=(const Key<P>&) = delete;
+    Key(Key<P>&&) = delete;
+    Key& operator=(Key<P>&&) = delete;
  
 private:
     friend class App;

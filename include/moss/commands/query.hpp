@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * @file    commands/query.hpp
  * @brief   Defines query structures for retrieving components from entity
@@ -170,7 +172,7 @@ private:
 // Wrapper around DynamicQuery without any View (inc and exc) argument.
 template<typename... Wth>
 requires(sizeof...(Wth) > 0)
-class DynamicQuery<With<Wth...>, void> {
+class DynamicQuery<With<Wth...>, View<void, void>> {
 public:
     DynamicQuery() = default;
     DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
