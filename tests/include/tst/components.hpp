@@ -5,28 +5,22 @@
 
 namespace tst {
 
-struct CompA : moss::Component {
+struct CompA {
     std::string uId;
-    u32 num;
-
-    CompA(const char* id, u32 n = 0) : uId(id), num(n) { }
+    u32 num = 0;
 };
 
-struct CompB : moss::Component {
+struct CompB {
     std::string uId;
-    u32 num;
-
-    CompB(const char* id, u32 n = 0) : uId(id), num(n) { }
+    u32 num = 0;
 };
 
-struct CompC : moss::Component {
+struct CompC {
     std::string uId;
-    u32 num;
-
-    CompC(const char* id, u32 n = 0) : uId(id), num(n) { }
+    u32 num = 0;
 };
 
-struct CompD : moss::Component {
+struct CompD {
     u32 num;
 };
 

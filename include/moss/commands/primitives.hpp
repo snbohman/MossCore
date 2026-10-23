@@ -12,7 +12,6 @@
 
 #include <moss/meta/libs.hpp>
 #include <moss/meta/types.hpp>
-#include <moss/ecs/component.hpp>
 
 
 namespace moss {

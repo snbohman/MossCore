@@ -70,7 +70,7 @@ public:
      * @return Reference to this Mirror instance.
      */
     template<typename T>
-    requires(std::is_base_of_v<Component, T>)
+    requires(std::is_class_v<T>)
     Mirror& attach(const T& value) {
         for (entt::entity entity : m_view)
             m_registry->emplace<T>(entity, value);   // copy of the aggregate
