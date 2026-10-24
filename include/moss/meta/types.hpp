@@ -1,7 +1,12 @@
+/**
+ * @file    meta/types.hpp
+ * @brief   Short fixed-width aliases, in the global namespace on purpose.
+ */
+
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
-
 
 using u8  = std::uint8_t;
 using u16 = std::uint16_t;

@@ -1,16 +1,19 @@
 /**
- * @file    meta/defines.hpp
- * @brief   Defines log macros
+ * @file    meta/logs.hpp
+ * @brief   Log macros (spdlog) and the fatal-error policy.
  *
- * Defines spdlog log macros and static assert
- * macros.
+ * M_ERROR / M_WARN / M_INFO / M_DEB     log with source location.
+ * M_*_IF(cond, ...)                     log when cond is true.
+ * M_FATAL(...)                          log an error, then abort. No exceptions in moss.
+ * M_FATAL_IF(cond, ...)                 M_FATAL when cond is true.
+ *
+ * The format string must be a compile-time literal with {} placeholders. The
+ * "F" variants take no arguments (the string is then used as is).
  */
-
 
 #pragma once
 
 #include <moss/meta/libs.hpp>
-
 
 #define M_SA(condition, message) static_assert(condition, "[MOSS] " message)
 
@@ -35,3 +38,18 @@
 #define M_WARN_IFF(cond, message) do { if (cond) M_WARNF(message); } while (0)
 #define M_INFO_IFF(cond, message) do { if (cond) M_INFOF(message); } while (0)
 #define M_DEB_IFF(cond, message) do { if (cond) M_DEBF(message); } while (0)
+
+#define M_FATAL(message, ...)                   \
+    do {                                        \
+        M_ERROR(message, ##__VA_ARGS__);        \
+        std::abort();                           \
+    } while (0)
+
+#define M_FATALF(message)                       \
+    do {                                        \
+        M_ERRORF(message);                      \
+        std::abort();                           \
+    } while (0)
+
+#define M_FATAL_IF(cond, message, ...) do { if (cond) M_FATAL(message, ##__VA_ARGS__); } while (0)
+#define M_FATAL_IFF(cond, message) do { if (cond) M_FATALF(message); } while (0)

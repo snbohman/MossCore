@@ -1,41 +1,26 @@
 /**
- * @file commands/quit.hpp
- * @brief Quit command
+ * @file    commands/quit.hpp
+ * @brief   Quit: ask the App to stop after the current frame.
+ *
+ *     cmd::Quit::init(key).quit();
+ *
+ * The frame in progress finishes (every remaining system still ticks), then
+ * App::run returns.
  */
 
 #pragma once
 
-#include <moss/core/key.hpp>
-#include <moss/commands/primitives.hpp>
-
+#include <moss/commands/command.hpp>
 
 namespace moss::commands {
 
-class Quit {
+class Quit : public Command<Quit> {
 public:
     Quit() = default;
-    Quit(const Key<key::READ>& key) { apply(key); }
-    Quit(const Key<key::WRITE>& key) { apply(key); }
 
-    static Quit init() { return Quit(); }
-    static Quit init(const Key<key::READ>& key) { return Quit(key); }
-    static Quit init(const Key<key::WRITE>& key) { return Quit(key); }
+    void quit() const { quitFlag() = true; }
 
-    void apply(const Key<key::READ>& key) { m_quit = key.m_quit; } 
-    void apply(const Key<key::WRITE>& key) { m_quit = key.m_quit; } 
-    void clean() { m_quit = nullptr; }
-
-    void quit(bool doClean = false) {
-        M_ERROR_IFF(m_quit == nullptr,
-            "Quit pointer is null. Not that apply must be called before any get method"
-        );
-
-        *m_quit = true;
-        if (doClean) clean();
-    }
-
-private:
-    bool* m_quit;
+    [[nodiscard]] bool requested() const { return quitFlag(); }
 };
 
-};
+}

@@ -1,200 +1,207 @@
-#pragma once
-
-/*
+/**
  * @file    commands/query.hpp
- * @brief   Defines query structures for retrieving components from entity
- * views.
+ * @brief   Query: read components of all entities, a subset, or one entity.
  *
- * Queries allow efficient retrieval of component data from a specified entity
- * view. The retrieved components are stored either in an `Atlas` or a `Pool`.
+ *     Query<With<A, B>>                         entities that have A and B, fetch both
+ *     Query<With<A>, View<Include<Tag>>>        ... that also have Tag (not fetched)
+ *     Query<With<A>, View<Include<>, Exclude<X>>>          ... and do not have X
  *
- * -   `Atlas`:  A container suitable for storing components from multiple
- *     entities within the view.
- * -   `Pool`:   A container intended for storing components from a single
- *     entity. Using a `Pool` with a view containing multiple entities may
- *     lead to undefined behavior, and a warning is issued. Part of atlas
- * output.
+ * With always implies Include. Tags (empty types) cannot be fetched, so they go
+ * in View<Include<...>> or are checked with has<T>().
  *
- * Two types of queries are provided:
+ *     atlas()            every match
+ *     atlas(subset)      the entities of `subset` that match, IN THE ORDER of
+ *                        `subset` (use the Context's DynamicView to keep creation
+ *                        order; atlas() order is entt's pool order)
+ *     find(e) / get(e)   one entity: optional Pool / Pool (aborts on no match)
+ *     copy(e)            one entity, by value: optional<T> for a single With,
+ *                        optional<tuple<...>> otherwise. Safe to keep across
+ *                        structural changes. This is the "optional component" read.
+ *     first() / single() first match / the only match (aborts unless exactly one)
+ *     contains(e)        does e match the query
+ *     has<C...>(e)       does e have C... (any components, tags included)
+ *     entities(), entities(subset), count(), empty()
+ *     each(f), each(subset, f)    f(Entity, A&, B&); do not add or remove
+ *                                 components of the queried types inside f
+ *     view()             the raw entt view, as an escape hatch
  *
- * 1.  **Query:** A compile-time query that operates on a statically defined
- *     `View`.  This offers compile-time safety and optimization opportunities.
- *
- * 2.  **DynamicQuery:** A runtime query that operates on a `DynamicView`.
- *     This provides flexibility but sacrifices compile-time safety.
+ * References from atlas / find / get / first / single stay valid until a
+ * component of that type is added or removed anywhere.
  */
 
-#include "moss/meta/libs.hpp"
+#pragma once
+
+#include <moss/meta/libs.hpp>
 #include <moss/meta/logs.hpp>
-#include <moss/core/key.hpp>
-#include <moss/core/context.hpp>
 #include <moss/commands/primitives.hpp>
+#include <moss/commands/command.hpp>
+
+namespace moss::detail {
+
+template<typename... Ts>
+struct TypeList { };
+
+template<typename T, typename... Ts>
+inline constexpr bool contains_v = (std::is_same_v<T, Ts> || ...);
+
+template<typename Out, typename... In>
+struct UniqueImpl {
+    using type = Out;
+};
+
+template<typename... Out, typename Head, typename... Tail>
+struct UniqueImpl<TypeList<Out...>, Head, Tail...> {
+    using type = typename UniqueImpl<
+        std::conditional_t<contains_v<Head, Out...>, TypeList<Out...>, TypeList<Out..., Head>>,
+        Tail...
+    >::type;
+};
+
+// The distinct types of Ts..., first occurrence wins
+template<typename... Ts>
+using Unique = typename UniqueImpl<TypeList<>, Ts...>::type;
+
+template<typename... Inc, typename... Ex>
+auto makeView(entt::registry& registry, TypeList<Inc...>, TypeList<Ex...>) {
+    if constexpr (sizeof...(Ex) == 0) return registry.view<Inc...>();
+    else return registry.view<Inc...>(entt::exclude<Ex...>);
+}
+
+}
 
 namespace moss::commands {
 
 template<typename... Wth, typename... VwInc, typename... VwEx>
 requires(sizeof...(Wth) > 0)
-class Query<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
+class Query<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>>
+    : public Command<Query<With<Wth...>, View<Include<VwInc...>, Exclude<VwEx...>>>> {
 public:
+    M_SA((!std::is_empty_v<Wth> && ...),
+        "Query<With<...>> fetches components, so a tag (empty type) cannot be in With. "
+        "Put it in View<Include<...>> or check it with has<T>()");
+
+    using Included = detail::Unique<Wth..., VwInc...>;
+    using Excluded = detail::Unique<VwEx...>;
+
+    // What copy() returns: T for a single With, std::tuple<...> otherwise
+    using Value = std::conditional_t<
+        sizeof...(Wth) == 1,
+        std::tuple_element_t<0, std::tuple<Wth...>>,
+        std::tuple<Wth...>
+    >;
+
     Query() = default;
-    Query(const Key<key::READ>& key) { apply(key); }
-    Query(entt::registry* registry) { apply(registry); }
 
-    static Query init() { return Query(); }
-    static Query init(const Key<key::READ>& key) { return Query(key); }
-    static Query init(entt::registry* registry) { return Query(registry); }
+    /* ------------------------------ Raw view ------------------------------ */
 
-    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
-    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
-    void clean() { m_registry = nullptr; m_view.clean(); }
+    [[nodiscard]] auto view() const {
+        return detail::makeView(this->registry(), Included{}, Excluded{});
+    }
 
-    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) {
-        M_ERROR_IFF(m_registry == nullptr,
-            "Registry is null. Note that apply must be called before any get method"
-        );
+    /* ----------------------------- Many entities ---------------------------- */
 
-        auto eView = m_view.view(doClean);
+    [[nodiscard]] Atlas<Wth...> atlas() const {
+        Atlas<Wth...> out;
+        for (Entity entity : view()) out.push_back(fetch(entity));
+        return out;
+    }
 
-        Atlas<Wth...> atlas;
-        atlas.reserve(std::distance(eView.begin(), eView.end()));
-        for (entt::entity entity : eView) {
-            atlas.push_back( { m_registry->get<Wth>(entity)... } );
-        }
+    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& subset) const {
+        auto v = view();
+        Atlas<Wth...> out;
+        out.reserve(subset.size());
+        for (Entity entity : subset)
+            if (v.contains(entity)) out.push_back(fetch(entity));
+        return out;
+    }
 
-        if (doClean) clean();
-        return std::move(atlas);
+    template<typename Func>
+    void each(Func&& func) const {
+        entt::registry& reg = this->registry();
+        for (Entity entity : view()) func(entity, reg.get<Wth>(entity)...);
+    }
+
+    template<typename Func>
+    void each(const DynamicView& subset, Func&& func) const {
+        entt::registry& reg = this->registry();
+        auto v = view();
+        for (Entity entity : subset)
+            if (v.contains(entity)) func(entity, reg.get<Wth>(entity)...);
+    }
+
+    [[nodiscard]] DynamicView entities() const {
+        DynamicView out;
+        for (Entity entity : view()) out.push_back(entity);
+        return out;
+    }
+
+    [[nodiscard]] DynamicView entities(const DynamicView& subset) const {
+        auto v = view();
+        DynamicView out;
+        for (Entity entity : subset)
+            if (v.contains(entity)) out.push_back(entity);
+        return out;
+    }
+
+    [[nodiscard]] usize count() const {
+        usize n = 0;
+        for (Entity entity : view()) { (void)entity; n++; }
+        return n;
+    }
+
+    [[nodiscard]] bool empty() const {
+        auto v = view();
+        return v.begin() == v.end();
+    }
+
+    /* ------------------------------ One entity ------------------------------ */
+
+    [[nodiscard]] bool contains(Entity entity) const { return view().contains(entity); }
+
+    template<typename... C>
+    [[nodiscard]] bool has(Entity entity) const {
+        entt::registry& reg = this->registry();
+        return reg.all_of<C...>(entity);
+    }
+
+    [[nodiscard]] std::optional<Pool<Wth...>> find(Entity entity) const {
+        if (!contains(entity)) return std::nullopt;
+        return fetch(entity);
+    }
+
+    [[nodiscard]] Pool<Wth...> get(Entity entity) const {
+        M_FATAL_IFF(!contains(entity), "Query::get: the entity does not match the query");
+        return fetch(entity);
+    }
+
+    [[nodiscard]] std::optional<Value> copy(Entity entity) const {
+        if (!contains(entity)) return std::nullopt;
+        entt::registry& reg = this->registry();
+        return Value(reg.get<Wth>(entity)...);
+    }
+
+    [[nodiscard]] std::optional<Pool<Wth...>> first() const {
+        auto v = view();
+        auto it = v.begin();
+        if (it == v.end()) return std::nullopt;
+        return fetch(*it);
+    }
+
+    [[nodiscard]] Pool<Wth...> single() const {
+        auto v = view();
+        auto it = v.begin();
+        M_FATAL_IFF(it == v.end(), "Query::single: no entity matches");
+        const Entity entity = *it;
+        ++it;
+        M_FATAL_IFF(it != v.end(), "Query::single: more than one entity matches");
+        return fetch(entity);
     }
 
 private:
-    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
-    entt::registry* m_registry;
-};
-
-
-/**
- * @brief Wrapper around query without Exclude inside View
- *
- * Simple wrapper around the norma query. Has a query object
- * lying inside and calling that whenever.
- */
-template<typename... Wth, typename... VwInc>
-requires(sizeof...(Wth) > 0)
-class Query<With<Wth...>, View< Include<VwInc...>> > {
-public:
-    Query() = default;
-    Query(const Key<key::READ>& key) { q.apply(key); }
-    Query(entt::registry* registry) { q.apply(registry); }
-
-    static Query init() { return Query(); }
-    static Query init(const Key<key::READ>& key) { return Query(key); }
-    static Query init(entt::registry* registry) { return Query(registry); }
-
-    void apply(const Key<key::READ>& key) { q.apply(key); }
-    void apply(entt::registry* registry) { q.apply(registry); }
-    void clean() { q.clean(); }
-    
-    [[nodiscard]] Atlas<Wth...> atlas(bool doClean = false) { return std::move(q.atlas(doClean)); }
-
-private:
-    Query<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
-};
-
-template<typename... Wth, typename... VwInc, typename... VwEx>
-requires(sizeof...(Wth) > 0)
-class DynamicQuery<With<Wth...>, View< Include<VwInc...>, Exclude<VwEx...> >> {
-public:
-    DynamicQuery() = default;
-    DynamicQuery(const Key<key::READ>& key) { apply(key); }
-    DynamicQuery(const Key<key::WRITE>& key) { apply(key); }
-    DynamicQuery(entt::registry* registry) { apply(registry); }
-
-    static DynamicQuery init() { return DynamicQuery(); }
-    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
-
-    void apply(const Key<key::READ>& key) { m_registry = key.m_registry; m_view.apply(key); }
-    void apply(const Key<key::WRITE>& key) { m_registry = key.m_registry; m_view.apply(key); }
-    void apply(entt::registry* registry) { m_registry = registry; m_view.apply(registry); }
-    void clean() { m_registry = nullptr; }
-
-    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
-        M_ERROR_IFF(m_registry == nullptr,
-            "Registry is null. Note that apply must be called before any get method"
-        );
-
-        auto eView = m_view.view(doClean);
-
-        Atlas<Wth...> atlas;
-        atlas.reserve(view.size());
-        for (const auto& entity : view) {
-            if (!eView.contains(entity)) continue;
-            atlas.push_back( { m_registry->get<Wth>(entity)... } );
-        }
-
-        if (doClean) clean();
-        return std::move(atlas);
+    [[nodiscard]] Pool<Wth...> fetch(Entity entity) const {
+        entt::registry& reg = this->registry();
+        return Pool<Wth...>(reg.get<Wth>(entity)...);
     }
-
-private:
-    View<Include<VwInc...>, Exclude<VwEx...>> m_view;
-    entt::registry* m_registry;
 };
 
-// Wrapper around DynamicQuery without any Exclude Argument
-template<typename... Wth, typename... VwInc>
-requires(sizeof...(Wth) > 0)
-class DynamicQuery<With<Wth...>, View< Include<VwInc...>> > {
-public:
-    DynamicQuery() = default;
-    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
-    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
-    DynamicQuery(entt::registry* registry) { q.apply(registry); }
-
-    static DynamicQuery init() { return DynamicQuery(); }
-    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
-
-    void apply(const Key<key::READ>& key) { q.apply(key); }
-    void apply(const Key<key::WRITE>& key) { q.apply(key); }
-    void apply(entt::registry* registry) { q.apply(registry); }
-    void clean() { q.clean(); }
-    
-    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
-        return std::move(q.atlas(view, doClean));
-    }
-
-private:
-    DynamicQuery<With<Wth...>, View<Include<VwInc...>, Exclude<>>> q;
-};
-
-// Wrapper around DynamicQuery without any View (inc and exc) argument.
-template<typename... Wth>
-requires(sizeof...(Wth) > 0)
-class DynamicQuery<With<Wth...>, View<void, void>> {
-public:
-    DynamicQuery() = default;
-    DynamicQuery(const Key<key::READ>& key) { q.apply(key); }
-    DynamicQuery(const Key<key::WRITE>& key) { q.apply(key); }
-    DynamicQuery(entt::registry* registry) { q.apply(registry); }
-
-    static DynamicQuery init() { return DynamicQuery(); }
-    static DynamicQuery init(const Key<key::READ>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(const Key<key::WRITE>& key) { return DynamicQuery(key); }
-    static DynamicQuery init(entt::registry* registry) { return DynamicQuery(registry); }
-
-    void apply(const Key<key::READ>& key) { q.apply(key); }
-    void apply(const Key<key::WRITE>& key) { q.apply(key); }
-    void apply(entt::registry* registry) { q.apply(registry); }
-    void clean() { q.clean(); }
-    
-    [[nodiscard]] Atlas<Wth...> atlas(const DynamicView& view, bool doClean = false) {
-        return std::move(q.atlas(view, doClean));
-    }
-
-private:
-    DynamicQuery<With<Wth...>, View<Include<>, Exclude<>>> q;
-};
-
-} // moss::commands
+}

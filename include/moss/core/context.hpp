@@ -1,11 +1,22 @@
 /**
  * @file    core/context.hpp
- * @brief   Defines the `Context` class that groups systems and manages entities.
+ * @brief   Context: a group of systems plus the entities they work on.
  *
- * The `Context` class represents a collection of entities and systems.
- * It provides methods for initializing, building, ticking, and exiting
- * the context. Each context is a specialized group of systems that operates
- * on a set of entities. 
+ * A Context is the unit of logic you write: override init(), and describe the
+ * entities and systems through the Mirror:
+ *
+ *     class MyContext : public Context {
+ *     public:
+ *         void init(Mirror& mirror) override {
+ *             mirror.connect<SystemA, SystemB>()
+ *                   .create().attach<Foo>({.x = 1});
+ *         }
+ *     };
+ *
+ * Every entity created through the Mirror belongs to the Context, and every
+ * system of the Context receives that list as the `entities` argument.
+ * The lifecycle (build, tick, exit) belongs to the App and cannot be
+ * overridden: build and tick run systems in connection order, exit in reverse.
  */
 
 #pragma once
@@ -13,54 +24,49 @@
 #include <moss/ecs/system.hpp>
 #include <moss/commands/primitives.hpp>
 
+#include <memory>
+#include <vector>
+
 namespace moss {
 
 class Mirror;
+class App;
 
-/**
- * @class Context
- * @brief Base class for defining grouped logic (systems + entities).
- *
- * Contexts are created by the user and mounted into the App. They define a
- * self-contained unit of game/application logic. The `init()` method is the only
- * function intended to be overridden, where entity creation and system attachment
- * is performed via the Mirror class.
- *
- * The internal lifecycle (`build`, `tick`, `exit`) is managed by the engine and
- * *can't* be overridden. These methods apply to all systems registered during `init()`.
- */
 class Context {
 public:
     virtual ~Context() = default;
 
-    virtual void init(Mirror& mirror) { };
-    void build(const Key<key::WRITE>& key) {
-        for (auto& s : m_systems) {
-            s->build();
-            s->build(key);
-            s->build(key, m_view);
-        }
-    }
-
-    void tick(const Key<key::READ>& key) {
-        for (auto& s : m_systems) {
-            s->tick();
-            s->tick(key);
-            s->tick(key, m_view);
-        }
-    }
-
-    void exit(const Key<key::WRITE>& key) {
-        for (auto& s : m_systems) {
-            s->exit();
-            s->exit(key);
-            s->exit(key, m_view);
-        }
-    }
+    virtual void init(Mirror&) { }
 
 private:
     friend class Mirror;
     friend class App;
+
+    void build(const Key<key::WRITE>& key) {
+        for (auto& system : m_systems) {
+            system->build();
+            system->build(key);
+            system->build(key, m_view);
+        }
+    }
+
+    void tick(const Key<key::READ>& key) {
+        for (auto& system : m_systems) {
+            system->tick();
+            system->tick(key);
+            system->tick(key, m_view);
+        }
+    }
+
+    // Reverse order: a system is torn down before the ones it depends on
+    void exit(const Key<key::WRITE>& key) {
+        for (auto it = m_systems.rbegin(); it != m_systems.rend(); ++it) {
+            System& system = **it;
+            system.exit();
+            system.exit(key);
+            system.exit(key, m_view);
+        }
+    }
 
     DynamicView m_view;
     std::vector<std::unique_ptr<System>> m_systems;
