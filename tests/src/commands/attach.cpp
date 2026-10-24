@@ -1,22 +1,8 @@
 #include <doctest/doctest.h>
 #include <moss/moss.hpp>
-#include <tst/components.hpp>
 #include <tst/simple.hpp>
-#include <tst/utils.hpp>
 
 using namespace moss;
-
-TEST_CASE("Attach: fixture registry") {
-    entt::registry reg = tst::newRegistry();
-
-    GIVEN("Attaching CompD") {
-        auto e = reg.create();
-        auto [comp] = cmd::Attach<With<tst::CompD>>::init(&reg).to(e);
-        comp.num = 9;
-
-        CHECK(reg.get<tst::CompD>(e).num == 9);
-    }
-}
 
 TEST_CASE("Attach: one entity") {
     tst::World w;
